@@ -11,6 +11,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Calculator } from 'lucide-react';
+import { ExtendedAddonService } from '../types';
 
 interface AddonService {
   id: string;
@@ -231,11 +233,15 @@ const ADDON_SERVICES: AddonService[] = [
 interface AddonServiceTableProps {
   selectedServices?: string[];
   onSelect?: (serviceId: string) => void;
+  extendedAddons?: ExtendedAddonService[];
+  onAnalyze?: (addon: ExtendedAddonService) => void;
 }
 
 export function AddonServiceTable({
   selectedServices = [],
   onSelect,
+  extendedAddons,
+  onAnalyze,
 }: AddonServiceTableProps) {
   const [selected, setSelected] = useState<Set<string>>(new Set(selectedServices));
 
@@ -248,6 +254,18 @@ export function AddonServiceTable({
     }
     setSelected(newSelected);
     onSelect?.(serviceId);
+  };
+
+  // 확장된 부가서비스 데이터가 있으면 사용
+  const addonsToShow = extendedAddons || ADDON_SERVICES;
+
+  const handleAnalyze = (addonId: string) => {
+    if (extendedAddons && onAnalyze) {
+      const addon = extendedAddons.find(a => a.id === addonId);
+      if (addon) {
+        onAnalyze(addon);
+      }
+    }
   };
 
   return (
@@ -264,7 +282,7 @@ export function AddonServiceTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {ADDON_SERVICES.map((service) => {
+          {addonsToShow.map((service) => {
             const isSelected = selected.has(service.id);
             return (
               <TableRow
@@ -295,14 +313,27 @@ export function AddonServiceTable({
                   )}
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button
-                    size="sm"
-                    variant={isSelected ? 'secondary' : 'default'}
-                    onClick={() => handleSelect(service.id)}
-                    className={isSelected ? 'bg-gray-400 hover:bg-gray-500' : ''}
-                  >
-                    {isSelected ? '사용 중' : '선택'}
-                  </Button>
+                  <div className="flex items-center justify-end gap-2">
+                    {isSelected && extendedAddons && onAnalyze && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleAnalyze(service.id)}
+                        className="gap-1 text-orange-600 border-orange-300 hover:bg-orange-50"
+                      >
+                        <Calculator className="w-3 h-3" />
+                        해지 분석
+                      </Button>
+                    )}
+                    <Button
+                      size="sm"
+                      variant={isSelected ? 'secondary' : 'default'}
+                      onClick={() => handleSelect(service.id)}
+                      className={isSelected ? 'bg-gray-400 hover:bg-gray-500' : ''}
+                    >
+                      {isSelected ? '사용 중' : '선택'}
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             );

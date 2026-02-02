@@ -11,6 +11,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Calculator } from 'lucide-react';
+import { ExtendedDiscount } from '../types';
 
 interface Discount {
   id: string;
@@ -168,11 +170,15 @@ const DISCOUNTS: Discount[] = [
 interface DiscountTableProps {
   selectedDiscounts?: string[];
   onSelect?: (discountId: string) => void;
+  extendedDiscounts?: ExtendedDiscount[];
+  onAnalyze?: (discount: ExtendedDiscount) => void;
 }
 
 export function DiscountTable({
   selectedDiscounts = [],
   onSelect,
+  extendedDiscounts,
+  onAnalyze,
 }: DiscountTableProps) {
   const [selected, setSelected] = useState<Set<string>>(new Set(selectedDiscounts));
 
@@ -185,6 +191,18 @@ export function DiscountTable({
     }
     setSelected(newSelected);
     onSelect?.(discountId);
+  };
+
+  // 확장된 할인 데이터가 있으면 사용
+  const discountsToShow = extendedDiscounts || DISCOUNTS;
+
+  const handleAnalyze = (discountId: string) => {
+    if (extendedDiscounts && onAnalyze) {
+      const discount = extendedDiscounts.find(d => d.id === discountId);
+      if (discount) {
+        onAnalyze(discount);
+      }
+    }
   };
 
   return (
@@ -201,7 +219,7 @@ export function DiscountTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {DISCOUNTS.map((discount) => {
+          {discountsToShow.map((discount) => {
             const isSelected = selected.has(discount.id);
             return (
               <TableRow
@@ -226,14 +244,27 @@ export function DiscountTable({
                   -{discount.discountAmount}
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button
-                    size="sm"
-                    variant={isSelected ? 'secondary' : 'default'}
-                    onClick={() => handleSelect(discount.id)}
-                    className={isSelected ? 'bg-gray-400 hover:bg-gray-500' : ''}
-                  >
-                    {isSelected ? '사용 중' : '선택'}
-                  </Button>
+                  <div className="flex items-center justify-end gap-2">
+                    {isSelected && extendedDiscounts && onAnalyze && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleAnalyze(discount.id)}
+                        className="gap-1 text-orange-600 border-orange-300 hover:bg-orange-50"
+                      >
+                        <Calculator className="w-3 h-3" />
+                        해지 분석
+                      </Button>
+                    )}
+                    <Button
+                      size="sm"
+                      variant={isSelected ? 'secondary' : 'default'}
+                      onClick={() => handleSelect(discount.id)}
+                      className={isSelected ? 'bg-gray-400 hover:bg-gray-500' : ''}
+                    >
+                      {isSelected ? '사용 중' : '선택'}
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             );

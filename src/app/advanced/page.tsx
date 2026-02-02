@@ -1,29 +1,102 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { DashboardLayout } from '@/features/dashboard/components';
 import { ConversationStream, AIConversationControls } from '@/features/transcript/components';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useCallStore, useUIStore, useTranscriptStore, useAIAnalysisStore } from '@/stores';
-import { Phone, PhoneOff, Pause, Play, CreditCard, Plane, Gift, Tag, User } from 'lucide-react';
+import { Phone, PhoneOff, Pause, Play, CreditCard, Plane, Gift, Tag, User, FlaskConical } from 'lucide-react';
 import {
   CustomerProfile,
   PlanTable,
   RoamingTable,
   AddonServiceTable,
   DiscountTable,
+  CancellationAnalysisModal,
 } from '@/features/advanced/components';
 import { WrapUpModal } from '@/features/wrap-up/components';
+import { DEMO_SCENARIOS, getScenarioById } from '@/features/advanced/data/demo-scenarios';
+import { analyzeCancel } from '@/features/advanced/lib/cancellation-calculator';
+import {
+  CancellationAnalysis,
+  ExtendedPlan,
+  ExtendedAddonService,
+  ExtendedDiscount,
+} from '@/features/advanced/types';
 
 export default function AdvancedPage() {
   const [activeTab, setActiveTab] = useState('profile');
+  const [selectedScenarioId, setSelectedScenarioId] = useState<string | null>(null);
+  const [analysisModalOpen, setAnalysisModalOpen] = useState(false);
+  const [currentAnalysis, setCurrentAnalysis] = useState<CancellationAnalysis | null>(null);
 
   const { callStatus, startCall, endCall, holdCall, resumeCall, reset } = useCallStore();
   const { openModal } = useUIStore();
   const { clearTranscripts } = useTranscriptStore();
   const { reset: resetAI } = useAIAnalysisStore();
+
+  // 선택된 시나리오 데이터
+  const selectedScenario = useMemo(() => {
+    return selectedScenarioId ? getScenarioById(selectedScenarioId) : null;
+  }, [selectedScenarioId]);
+
+  // 해지 분석 핸들러
+  const handleAnalyzePlan = (plan: ExtendedPlan) => {
+    if (!selectedScenario) return;
+    const analysis = analyzeCancel('plan', plan.id, {
+      plans: selectedScenario.plans,
+      addons: selectedScenario.addons,
+      discounts: selectedScenario.discounts,
+      selectedPlanId: selectedScenario.selectedPlanId,
+      selectedAddonIds: selectedScenario.selectedAddonIds,
+      selectedDiscountIds: selectedScenario.selectedDiscountIds,
+    });
+    if (analysis) {
+      setCurrentAnalysis(analysis);
+      setAnalysisModalOpen(true);
+    }
+  };
+
+  const handleAnalyzeAddon = (addon: ExtendedAddonService) => {
+    if (!selectedScenario) return;
+    const analysis = analyzeCancel('addon', addon.id, {
+      plans: selectedScenario.plans,
+      addons: selectedScenario.addons,
+      discounts: selectedScenario.discounts,
+      selectedPlanId: selectedScenario.selectedPlanId,
+      selectedAddonIds: selectedScenario.selectedAddonIds,
+      selectedDiscountIds: selectedScenario.selectedDiscountIds,
+    });
+    if (analysis) {
+      setCurrentAnalysis(analysis);
+      setAnalysisModalOpen(true);
+    }
+  };
+
+  const handleAnalyzeDiscount = (discount: ExtendedDiscount) => {
+    if (!selectedScenario) return;
+    const analysis = analyzeCancel('discount', discount.id, {
+      plans: selectedScenario.plans,
+      addons: selectedScenario.addons,
+      discounts: selectedScenario.discounts,
+      selectedPlanId: selectedScenario.selectedPlanId,
+      selectedAddonIds: selectedScenario.selectedAddonIds,
+      selectedDiscountIds: selectedScenario.selectedDiscountIds,
+    });
+    if (analysis) {
+      setCurrentAnalysis(analysis);
+      setAnalysisModalOpen(true);
+    }
+  };
 
   // 통화 시작
   const handleStartCall = () => {
@@ -104,12 +177,39 @@ export default function AdvancedPage() {
             )}
           </div>
 
-          {callStatus === 'wrap-up' && (
-            <Button variant="outline" onClick={handleNewCall} className="gap-2">
-              <Phone className="w-4 h-4" />
-              새 상담
-            </Button>
-          )}
+          <div className="flex items-center gap-3">
+            {/* 시나리오 선택 드롭다운 */}
+            <div className="flex items-center gap-2">
+              <FlaskConical className="w-4 h-4 text-muted-foreground" />
+              <Select
+                value={selectedScenarioId || ''}
+                onValueChange={(value) => setSelectedScenarioId(value || null)}
+              >
+                <SelectTrigger className="w-[280px]">
+                  <SelectValue placeholder="데모 시나리오 선택..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {DEMO_SCENARIOS.map((scenario) => (
+                    <SelectItem key={scenario.id} value={scenario.id}>
+                      <div className="flex flex-col">
+                        <span>{scenario.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {scenario.description}
+                        </span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {callStatus === 'wrap-up' && (
+              <Button variant="outline" onClick={handleNewCall} className="gap-2">
+                <Phone className="w-4 h-4" />
+                새 상담
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* 메인 컨텐츠 영역 - 1:2 비율 레이아웃 */}
@@ -164,12 +264,16 @@ export default function AdvancedPage() {
                       {/* 프로필 탭 */}
                       <TabsContent value="profile" className="mt-0 p-4">
                         <CustomerProfile
-                          name="김민수"
+                          name={selectedScenario?.customerName || '김민수'}
                           phone="010-1234-5678"
                           gender="남"
                           age={34}
                           location="서울특별시 강남구"
-                          currentPlan="5G 프리미엄"
+                          currentPlan={
+                            selectedScenario?.plans.find(
+                              (p) => p.id === selectedScenario.selectedPlanId
+                            )?.name || '5G 프리미엄'
+                          }
                         />
                       </TabsContent>
 
@@ -177,17 +281,25 @@ export default function AdvancedPage() {
                       <TabsContent value="plans" className="mt-0 p-4 space-y-4">
                         <div className="mb-4">
                           <CustomerProfile
-                            name="김민수"
+                            name={selectedScenario?.customerName || '김민수'}
                             phone="010-1234-5678"
                             gender="남"
                             age={34}
                             location="서울특별시 강남구"
-                            currentPlan="5G 프리미엄"
+                            currentPlan={
+                              selectedScenario?.plans.find(
+                                (p) => p.id === selectedScenario.selectedPlanId
+                              )?.name || '5G 프리미엄'
+                            }
                           />
                         </div>
                         <div>
                           <h3 className="text-sm font-semibold mb-3">요금제 선택</h3>
-                          <PlanTable currentPlanId="5g-premium" />
+                          <PlanTable
+                            currentPlanId={selectedScenario?.selectedPlanId || '5g-premium'}
+                            extendedPlans={selectedScenario?.plans}
+                            onAnalyze={handleAnalyzePlan}
+                          />
                         </div>
                       </TabsContent>
 
@@ -201,7 +313,15 @@ export default function AdvancedPage() {
                       <TabsContent value="addons" className="mt-0 p-4">
                         <h3 className="text-sm font-semibold mb-3">부가 서비스</h3>
                         <AddonServiceTable
-                          selectedServices={['addon-caller-id', 'addon-tmap', 'addon-music']}
+                          selectedServices={
+                            selectedScenario?.selectedAddonIds || [
+                              'addon-caller-id',
+                              'addon-tmap',
+                              'addon-music',
+                            ]
+                          }
+                          extendedAddons={selectedScenario?.addons}
+                          onAnalyze={handleAnalyzeAddon}
                         />
                       </TabsContent>
 
@@ -209,7 +329,14 @@ export default function AdvancedPage() {
                       <TabsContent value="discounts" className="mt-0 p-4">
                         <h3 className="text-sm font-semibold mb-3">할인 혜택</h3>
                         <DiscountTable
-                          selectedDiscounts={['discount-contract-24', 'discount-auto-pay']}
+                          selectedDiscounts={
+                            selectedScenario?.selectedDiscountIds || [
+                              'discount-contract-24',
+                              'discount-auto-pay',
+                            ]
+                          }
+                          extendedDiscounts={selectedScenario?.discounts}
+                          onAnalyze={handleAnalyzeDiscount}
                         />
                       </TabsContent>
                     </div>
@@ -223,6 +350,13 @@ export default function AdvancedPage() {
 
       {/* 통화 마무리 모달 */}
       <WrapUpModal />
+
+      {/* 해지 분석 모달 */}
+      <CancellationAnalysisModal
+        isOpen={analysisModalOpen}
+        onClose={() => setAnalysisModalOpen(false)}
+        analysis={currentAnalysis}
+      />
     </DashboardLayout>
   );
 }

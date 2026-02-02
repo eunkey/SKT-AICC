@@ -11,6 +11,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Calculator } from 'lucide-react';
+import { ExtendedPlan } from '../types';
 
 interface Plan {
   id: string;
@@ -182,9 +184,11 @@ const PLANS: Plan[] = [
 interface PlanTableProps {
   currentPlanId?: string;
   onSelect?: (planId: string) => void;
+  extendedPlans?: ExtendedPlan[];
+  onAnalyze?: (plan: ExtendedPlan) => void;
 }
 
-export function PlanTable({ currentPlanId, onSelect }: PlanTableProps) {
+export function PlanTable({ currentPlanId, onSelect, extendedPlans, onAnalyze }: PlanTableProps) {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(currentPlanId || null);
 
   const handleSelect = (planId: string) => {
@@ -194,6 +198,18 @@ export function PlanTable({ currentPlanId, onSelect }: PlanTableProps) {
     } else {
       setSelectedPlan(planId);
       onSelect?.(planId);
+    }
+  };
+
+  // 확장된 요금제 데이터가 있으면 사용, 없으면 기본 데이터 사용
+  const plansToShow = extendedPlans || PLANS;
+
+  const handleAnalyze = (planId: string) => {
+    if (extendedPlans && onAnalyze) {
+      const plan = extendedPlans.find(p => p.id === planId);
+      if (plan) {
+        onAnalyze(plan);
+      }
     }
   };
 
@@ -212,7 +228,7 @@ export function PlanTable({ currentPlanId, onSelect }: PlanTableProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {PLANS.map((plan) => {
+          {plansToShow.map((plan) => {
             const isSelected = selectedPlan === plan.id;
             return (
               <TableRow
@@ -236,14 +252,27 @@ export function PlanTable({ currentPlanId, onSelect }: PlanTableProps) {
                   </div>
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button
-                    size="sm"
-                    variant={isSelected ? 'secondary' : 'default'}
-                    onClick={() => handleSelect(plan.id)}
-                    className={isSelected ? 'bg-gray-400 hover:bg-gray-500' : ''}
-                  >
-                    {isSelected ? '사용 중' : '선택'}
-                  </Button>
+                  <div className="flex items-center justify-end gap-2">
+                    {isSelected && extendedPlans && onAnalyze && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleAnalyze(plan.id)}
+                        className="gap-1 text-orange-600 border-orange-300 hover:bg-orange-50"
+                      >
+                        <Calculator className="w-3 h-3" />
+                        해지 분석
+                      </Button>
+                    )}
+                    <Button
+                      size="sm"
+                      variant={isSelected ? 'secondary' : 'default'}
+                      onClick={() => handleSelect(plan.id)}
+                      className={isSelected ? 'bg-gray-400 hover:bg-gray-500' : ''}
+                    >
+                      {isSelected ? '사용 중' : '선택'}
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             );
