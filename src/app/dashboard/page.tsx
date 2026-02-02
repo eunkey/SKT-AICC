@@ -123,18 +123,13 @@ export default function DashboardPage() {
                     value={selectedScenarioId}
                     onValueChange={setSelectedScenarioId}
                   >
-                    <SelectTrigger className="w-[200px] h-9">
+                    <SelectTrigger className="w-[180px] h-9">
                       <SelectValue placeholder="시나리오 선택" />
                     </SelectTrigger>
                     <SelectContent>
                       {DEMO_SCENARIOS.map((scenario) => (
                         <SelectItem key={scenario.id} value={scenario.id}>
-                          <div className="flex flex-col">
-                            <span className="font-medium">{scenario.name}</span>
-                            <span className="text-xs text-muted-foreground">
-                              {scenario.description}
-                            </span>
-                          </div>
+                          {scenario.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
