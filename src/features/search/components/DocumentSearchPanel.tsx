@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Search, X, FileText, ChevronRight, Loader2, FolderOpen } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface SearchResult {
   filePath: string;
@@ -62,6 +64,7 @@ export function DocumentSearchPanel() {
   const [hasSearched, setHasSearched] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<DocumentContent | null>(null);
   const [isDocumentLoading, setIsDocumentLoading] = useState(false);
+  const selectedDocumentRef = useRef<DocumentContent | null>(null);
 
   const handleSearch = useCallback(async () => {
     if (query.trim().length < 2) return;
@@ -104,6 +107,21 @@ export function DocumentSearchPanel() {
     setHasSearched(false);
   };
 
+  const resolveRelativePath = (base: string, relative: string) => {
+    // Windows 백슬래시를 슬래시로 통일
+    const normalizedBase = base.replace(/\\/g, '/');
+    const baseDir = normalizedBase.substring(0, normalizedBase.lastIndexOf('/'));
+    const parts = baseDir.split('/');
+    for (const segment of relative.split('/')) {
+      if (segment === '..') {
+        parts.pop();
+      } else if (segment !== '.') {
+        parts.push(segment);
+      }
+    }
+    return parts.join('/');
+  };
+
   const handleOpenDocument = async (filePath: string) => {
     setIsDocumentLoading(true);
 
@@ -117,6 +135,7 @@ export function DocumentSearchPanel() {
       const data: DocumentContent = await response.json();
 
       if (response.ok) {
+        selectedDocumentRef.current = data;
         setSelectedDocument(data);
       }
     } catch (error) {
@@ -124,6 +143,50 @@ export function DocumentSearchPanel() {
     } finally {
       setIsDocumentLoading(false);
     }
+  };
+
+  const markdownComponents = {
+    p: ({ children }: { children?: React.ReactNode }) => {
+      const childArray = Array.isArray(children) ? children : [children];
+      const result: React.ReactNode[] = [];
+      childArray.forEach((child, i) => {
+        if (typeof child === 'string') {
+          // "A:" 앞에 줄바꿈 삽입 (문자열 중간에 \nA: 패턴 처리)
+          const parts = child.split(/(?=\nA[:：])/);
+          parts.forEach((part, j) => {
+            if (part.startsWith('\nA') || (j === 0 && part.match(/^A[:：]/))) {
+              result.push(<br key={`br-${i}-${j}`} />);
+            }
+            result.push(part);
+          });
+        } else {
+          result.push(child);
+        }
+      });
+      return <p>{result}</p>;
+    },
+    a: (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
+      const { href, children } = props;
+      if (href && href.endsWith('.md')) {
+        return (
+          <a
+            href="#"
+            className="text-foreground hover:underline cursor-pointer"
+            onClick={(e) => {
+              e.preventDefault();
+              const currentDoc = selectedDocumentRef.current;
+              const resolvedPath = currentDoc
+                ? resolveRelativePath(currentDoc.filePath, href)
+                : href;
+              handleOpenDocument(resolvedPath);
+            }}
+          >
+            {children}
+          </a>
+        );
+      }
+      return <a href={href}>{children}</a>;
+    },
   };
 
   const highlightKeyword = (text: string, keyword: string) => {
@@ -256,26 +319,26 @@ export function DocumentSearchPanel() {
 
       {/* 문서 상세 모달 */}
       <Dialog open={!!selectedDocument} onOpenChange={() => setSelectedDocument(null)}>
-        <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
-          <DialogHeader>
+        <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col overflow-hidden">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle className="flex items-center gap-2">
               <FileText className="w-5 h-5 text-[#E4002B]" />
               {selectedDocument?.title}
             </DialogTitle>
           </DialogHeader>
-          <ScrollArea className="flex-1 mt-4">
+          <div className="flex-1 min-h-0 overflow-y-auto mt-4">
             {isDocumentLoading ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="w-6 h-6 animate-spin" />
               </div>
             ) : (
               <div className="prose prose-sm dark:prose-invert max-w-none">
-                <pre className="whitespace-pre-wrap text-sm font-sans bg-muted p-4 rounded-lg overflow-auto">
-                  {selectedDocument?.content}
-                </pre>
+                <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                  {selectedDocument?.content ?? ''}
+                </ReactMarkdown>
               </div>
             )}
-          </ScrollArea>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

@@ -146,7 +146,7 @@ export async function GET(request: NextRequest) {
         const relativePath = path.relative(textsPath, filePath);
 
         results.push({
-          filePath: relativePath,
+          filePath: relativePath.replace(/\\/g, '/'),
           title: extractTitle(content),
           category: extractCategory(filePath, textsPath),
           matchedContent: extractMatchedContent(content, keyword),
