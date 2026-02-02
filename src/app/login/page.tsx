@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -46,12 +47,15 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50">
       <Card className="w-full max-w-md mx-4">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4">
-            <svg width="120" height="40" viewBox="0 0 120 40" className="mx-auto">
-              <text x="0" y="30" fill="#E4002B" fontSize="24" fontWeight="bold" fontFamily="Arial, sans-serif">
-                SK telecom
-              </text>
-            </svg>
+          <div className="mx-auto mb-4 flex flex-col items-center gap-3">
+            <Image
+              src="/logo.png"
+              alt="Logo"
+              width={120}
+              height={120}
+              className="rounded-2xl"
+            />
+            <span className="text-2xl font-bold text-[#E4002B]">SK telecom</span>
           </div>
           <CardTitle className="text-2xl">AI 상담 어시스턴트</CardTitle>
           <CardDescription>고객센터 상담사를 위한 AI 지원 시스템</CardDescription>
