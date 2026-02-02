@@ -11,20 +11,13 @@ export async function POST() {
   }
 
   const sessionConfig = {
-    session: {
-      type: 'realtime',
-      model: 'gpt-realtime',
-      audio: {
-        output: {
-          voice: 'marin',
-        },
-      },
-    },
+    model: 'gpt-4o-mini-realtime-preview',
+    voice: 'alloy',
   };
 
   try {
     const response = await fetch(
-      'https://api.openai.com/v1/realtime/client_secrets',
+      'https://api.openai.com/v1/realtime/sessions',
       {
         method: 'POST',
         headers: {
