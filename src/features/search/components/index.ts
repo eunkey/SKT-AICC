@@ -1,0 +1,1 @@
+export { DocumentSearchPanel } from './DocumentSearchPanel';
