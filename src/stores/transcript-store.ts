@@ -15,7 +15,7 @@ interface TranscriptState {
 
   // Actions
   addTranscript: (entry: TranscriptEntry) => void;
-  updateInterim: (entry: TranscriptEntry) => void;
+  updateInterim: (entry: TranscriptEntry | null) => void;
   finalizeInterim: () => void;
   setStreaming: (streaming: boolean) => void;
   clearTranscripts: () => void;
@@ -34,7 +34,7 @@ export const useTranscriptStore = create<TranscriptState>((set, get) => ({
 
   updateInterim: (entry) =>
     set({
-      currentInterim: entry,
+      currentInterim: entry || null,
     }),
 
   finalizeInterim: () =>

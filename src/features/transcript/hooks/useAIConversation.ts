@@ -8,106 +8,121 @@ interface ConversationMessage {
   content: string;
 }
 
+// Web Speech API 타입 선언
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResultList;
+  resultIndex: number;
+}
+
+interface SpeechRecognitionResultList {
+  length: number;
+  item(index: number): SpeechRecognitionResult;
+  [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionResult {
+  isFinal: boolean;
+  length: number;
+  item(index: number): SpeechRecognitionAlternative;
+  [index: number]: SpeechRecognitionAlternative;
+}
+
+interface SpeechRecognitionAlternative {
+  transcript: string;
+  confidence: number;
+}
+
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onerror: ((event: Event & { error: string }) => void) | null;
+  onend: (() => void) | null;
+  onstart: (() => void) | null;
+  start(): void;
+  stop(): void;
+  abort(): void;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition: new () => SpeechRecognition;
+    webkitSpeechRecognition: new () => SpeechRecognition;
+  }
+}
+
 export function useAIConversation() {
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  const streamRef = useRef<MediaStream | null>(null);
-  const recordingAudioContextRef = useRef<AudioContext | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
-  const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
   const conversationHistoryRef = useRef<ConversationMessage[]>([]);
   const playbackAudioContextRef = useRef<AudioContext | null>(null);
   const currentSourceRef = useRef<AudioBufferSourceNode | null>(null);
   const isListeningRef = useRef(false);
 
-  const { addTranscript, setStreaming } = useTranscriptStore();
+  const { addTranscript, updateInterim, setStreaming } = useTranscriptStore();
 
-  // 오디오 재생용 AudioContext 가져오기 또는 생성
+  // 오디오 재생용 AudioContext
   const getPlaybackAudioContext = useCallback(async (): Promise<AudioContext> => {
     if (!playbackAudioContextRef.current || playbackAudioContextRef.current.state === 'closed') {
       playbackAudioContextRef.current = new AudioContext();
     }
-
     if (playbackAudioContextRef.current.state === 'suspended') {
       await playbackAudioContextRef.current.resume();
     }
-
     return playbackAudioContextRef.current;
   }, []);
 
-  // 오디오 레벨 체크 (무음 감지용)
-  const checkAudioLevel = useCallback(() => {
-    if (!analyserRef.current) return 0;
-    const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
-    analyserRef.current.getByteFrequencyData(dataArray);
-    return dataArray.reduce((a, b) => a + b) / dataArray.length;
-  }, []);
-
-  // Web Audio API를 사용하여 TTS 오디오 재생
+  // TTS 오디오 재생
   const playTTSAudio = useCallback(async (text: string): Promise<void> => {
     setIsSpeaking(true);
-
     try {
-      // TTS API 호출
+      console.log('[AI대화] TTS API 호출 중...');
       const response = await fetch('/api/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text, voice: 'nova' }),
       });
 
-      if (!response.ok) {
-        throw new Error('TTS failed');
-      }
+      if (!response.ok) throw new Error('TTS failed');
 
-      // ArrayBuffer로 가져오기
       const arrayBuffer = await response.arrayBuffer();
-
-      // AudioContext 가져오기
       const audioContext = await getPlaybackAudioContext();
-
-      // 오디오 디코딩
       const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
-      // 재생
       return new Promise((resolve) => {
         const source = audioContext.createBufferSource();
         source.buffer = audioBuffer;
         source.connect(audioContext.destination);
-
         currentSourceRef.current = source;
 
         source.onended = () => {
           setIsSpeaking(false);
           currentSourceRef.current = null;
+          console.log('[AI대화] TTS 재생 완료');
           resolve();
         };
-
         source.start(0);
       });
     } catch (err) {
-      console.error('TTS playback error:', err);
+      console.error('[AI대화] TTS 재생 오류:', err);
       setIsSpeaking(false);
-      // TTS 실패해도 대화는 계속 진행
     }
   }, [getPlaybackAudioContext]);
 
   // AI 응답 생성 및 재생
   const generateAndPlayResponse = useCallback(async (customerMessage: string) => {
     setIsProcessing(true);
+    console.log('[AI대화] AI 응답 생성 시작');
 
     try {
-      // 1. 대화 히스토리에 고객 메시지 추가
-      conversationHistoryRef.current.push({
-        role: 'user',
-        content: customerMessage,
-      });
+      conversationHistoryRef.current.push({ role: 'user', content: customerMessage });
 
-      // 2. AI 응답 생성
+      console.log('[AI대화] Chat API 호출 중...');
       const chatResponse = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -123,14 +138,10 @@ export function useAIConversation() {
       }
 
       const { text: aiResponse } = await chatResponse.json();
+      console.log('[AI대화] AI 응답:', aiResponse);
 
-      // 3. 대화 히스토리에 AI 응답 추가
-      conversationHistoryRef.current.push({
-        role: 'assistant',
-        content: aiResponse,
-      });
+      conversationHistoryRef.current.push({ role: 'assistant', content: aiResponse });
 
-      // 4. 상담사(AI) 응답을 트랜스크립트에 추가
       const counselorEntry: TranscriptEntry = {
         id: `transcript-ai-${Date.now()}`,
         speaker: 'counselor',
@@ -142,220 +153,190 @@ export function useAIConversation() {
 
       setIsProcessing(false);
 
-      // 5. TTS로 음성 재생
+      console.log('[AI대화] TTS 재생 시작');
       await playTTSAudio(aiResponse);
 
     } catch (err) {
-      console.error('AI response error:', err);
+      console.error('[AI대화] AI 응답 오류:', err);
       setError(err instanceof Error ? err.message : 'AI response failed');
       setIsProcessing(false);
     }
   }, [addTranscript, playTTSAudio]);
 
-  // 고객 음성을 텍스트로 변환
-  const transcribeCustomerAudio = useCallback(async (audioBlob: Blob) => {
-    if (audioBlob.size < 1000) {
-      console.log('Audio too short, skipping');
-      return;
-    }
-
-    setIsProcessing(true);
-
-    try {
-      const formData = new FormData();
-      formData.append('audio', audioBlob, 'recording.webm');
-      formData.append('speaker', 'customer');
-
-      const response = await fetch('/api/transcribe', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Transcription failed');
-      }
-
-      const { text } = await response.json();
-
-      if (text && text.trim()) {
-        // 고객 발화 트랜스크립트에 추가
-        const customerEntry: TranscriptEntry = {
-          id: `transcript-customer-${Date.now()}`,
-          speaker: 'customer',
-          text: text.trim(),
-          isFinal: true,
-          timestamp: new Date(),
-        };
-        addTranscript(customerEntry);
-
-        // AI 응답 생성 및 재생
-        await generateAndPlayResponse(text.trim());
-      } else {
-        setIsProcessing(false);
-      }
-    } catch (err) {
-      console.error('Transcription error:', err);
-      setError(err instanceof Error ? err.message : 'Transcription failed');
-      setIsProcessing(false);
-    }
-  }, [addTranscript, generateAndPlayResponse]);
-
-  // 새 녹음 시작 (기존 스트림 사용)
-  const startNewRecording = useCallback(() => {
-    if (!streamRef.current || !isListeningRef.current) return;
-
-    try {
-      const newRecorder = new MediaRecorder(streamRef.current, {
-        mimeType: 'audio/webm;codecs=opus',
-      });
-      mediaRecorderRef.current = newRecorder;
-      audioChunksRef.current = [];
-
-      newRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
-        }
-      };
-
-      newRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        audioChunksRef.current = [];
-
-        if (isListeningRef.current) {
-          await transcribeCustomerAudio(audioBlob);
-
-          // 처리 완료 후 새 녹음 시작
-          if (isListeningRef.current && streamRef.current) {
-            setTimeout(() => {
-              if (isListeningRef.current) {
-                startNewRecording();
-              }
-            }, 300);
-          }
-        }
-      };
-
-      newRecorder.start(100);
-
-      // 무음 감지 루프
-      const detectSilence = () => {
-        if (!mediaRecorderRef.current || mediaRecorderRef.current.state !== 'recording' || !isListeningRef.current) {
-          return;
-        }
-
-        const level = checkAudioLevel();
-
-        if (level < 10) {
-          if (!silenceTimerRef.current) {
-            silenceTimerRef.current = setTimeout(() => {
-              if (mediaRecorderRef.current?.state === 'recording' && audioChunksRef.current.length > 0) {
-                mediaRecorderRef.current.stop();
-              }
-              silenceTimerRef.current = null;
-            }, 1500);
-          }
-        } else {
-          if (silenceTimerRef.current) {
-            clearTimeout(silenceTimerRef.current);
-            silenceTimerRef.current = null;
-          }
-        }
-
-        if (isListeningRef.current) {
-          requestAnimationFrame(detectSilence);
-        }
-      };
-
-      detectSilence();
-    } catch (err) {
-      console.error('Failed to start new recording:', err);
-    }
-  }, [checkAudioLevel, transcribeCustomerAudio]);
-
-  // 녹음 시작
+  // 음성 인식 시작
   const startListening = useCallback(async () => {
     try {
       setError(null);
+      console.log('[AI대화] 음성 인식 시작 요청');
 
-      // 오디오 재생 컨텍스트 미리 초기화 및 활성화 (사용자 상호작용)
+      // Web Speech API 지원 확인
+      const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognitionAPI) {
+        throw new Error('이 브라우저에서는 음성 인식을 지원하지 않습니다. Chrome을 사용해주세요.');
+      }
+
+      // 마이크 권한 명시적 요청
+      console.log('[AI대화] 마이크 권한 요청 중...');
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach(track => track.stop());
+        console.log('[AI대화] 마이크 권한 획득 완료');
+      } catch (micErr) {
+        console.error('[AI대화] 마이크 권한 거부:', micErr);
+        throw new Error('마이크 권한이 필요합니다.');
+      }
+
+      // 오디오 재생 컨텍스트 초기화
       const audioContext = await getPlaybackAudioContext();
+      console.log('[AI대화] AudioContext 상태:', audioContext.state);
 
-      // 무음 재생으로 오디오 컨텍스트 완전히 활성화
       const silentBuffer = audioContext.createBuffer(1, 1, 22050);
       const silentSource = audioContext.createBufferSource();
       silentSource.buffer = silentBuffer;
       silentSource.connect(audioContext.destination);
       silentSource.start();
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          sampleRate: 16000,
-        }
-      });
-      streamRef.current = stream;
+      // 음성 인식 설정
+      const recognition = new SpeechRecognitionAPI();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'ko-KR';
+
+      recognitionRef.current = recognition;
       isListeningRef.current = true;
 
-      // 오디오 분석 설정
-      recordingAudioContextRef.current = new AudioContext();
-      const source = recordingAudioContextRef.current.createMediaStreamSource(stream);
-      analyserRef.current = recordingAudioContextRef.current.createAnalyser();
-      analyserRef.current.fftSize = 256;
-      source.connect(analyserRef.current);
+      recognition.onstart = () => {
+        console.log('[AI대화] 음성 인식 시작됨');
+        setIsRecording(true);
+        setStreaming(true);
+      };
 
-      setIsRecording(true);
-      setStreaming(true);
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
+        let interimTranscript = '';
 
-      // 첫 녹음 시작
-      startNewRecording();
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const result = event.results[i];
+          const transcript = result[0].transcript;
+
+          if (result.isFinal) {
+            console.log('[AI대화] 최종 인식:', transcript);
+
+            // interim 초기화
+            updateInterim(null);
+
+            // 최종 결과 추가
+            const customerEntry: TranscriptEntry = {
+              id: `transcript-customer-${Date.now()}`,
+              speaker: 'customer',
+              text: transcript.trim(),
+              isFinal: true,
+              timestamp: new Date(),
+            };
+            addTranscript(customerEntry);
+
+            // AI 응답 생성
+            recognition.stop();
+            generateAndPlayResponse(transcript.trim()).then(() => {
+              if (isListeningRef.current) {
+                console.log('[AI대화] 음성 인식 재시작');
+                setTimeout(() => {
+                  if (isListeningRef.current) {
+                    try {
+                      recognition.start();
+                    } catch (e) {
+                      console.log('[AI대화] 재시작 중 오류:', e);
+                    }
+                  }
+                }, 100);
+              }
+            });
+          } else {
+            interimTranscript += transcript;
+            console.log('[AI대화] 중간 인식:', interimTranscript);
+
+            // 실시간 중간 결과 표시
+            const interimEntry: TranscriptEntry = {
+              id: 'interim-customer',
+              speaker: 'customer',
+              text: interimTranscript,
+              isFinal: false,
+              timestamp: new Date(),
+            };
+            updateInterim(interimEntry);
+          }
+        }
+      };
+
+      recognition.onerror = (event: Event & { error: string }) => {
+        console.error('[AI대화] 음성 인식 오류:', event.error);
+
+        if (event.error === 'no-speech') {
+          console.log('[AI대화] 음성 없음, 계속 대기...');
+          return;
+        }
+
+        if (event.error === 'aborted') {
+          return;
+        }
+
+        if (event.error === 'network') {
+          setError('네트워크 오류: 인터넷 연결을 확인하세요 (내부망에서는 작동하지 않을 수 있습니다)');
+          return;
+        }
+
+        setError(`음성 인식 오류: ${event.error}`);
+      };
+
+      recognition.onend = () => {
+        console.log('[AI대화] 음성 인식 종료됨');
+
+        if (isListeningRef.current) {
+          console.log('[AI대화] 자동 재시작');
+          setTimeout(() => {
+            if (isListeningRef.current) {
+              try {
+                recognition.start();
+              } catch (e) {
+                console.log('[AI대화] 재시작 실패:', e);
+                setIsRecording(false);
+                setStreaming(false);
+              }
+            }
+          }, 100);
+        }
+      };
+
+      recognition.start();
+      console.log('[AI대화] Web Speech API 시작됨');
 
     } catch (err) {
-      console.error('Failed to start listening:', err);
+      console.error('[AI대화] 음성 인식 시작 실패:', err);
       setError(err instanceof Error ? err.message : 'Failed to start recording');
       setIsRecording(false);
       isListeningRef.current = false;
     }
-  }, [getPlaybackAudioContext, setStreaming, startNewRecording]);
+  }, [getPlaybackAudioContext, setStreaming, addTranscript, updateInterim, generateAndPlayResponse]);
 
-  // 녹음 중지
+  // 음성 인식 중지
   const stopListening = useCallback(() => {
+    console.log('[AI대화] 음성 인식 중지 요청');
     isListeningRef.current = false;
 
-    if (silenceTimerRef.current) {
-      clearTimeout(silenceTimerRef.current);
-      silenceTimerRef.current = null;
-    }
-
-    if (mediaRecorderRef.current?.state === 'recording') {
-      mediaRecorderRef.current.stop();
-    }
-    mediaRecorderRef.current = null;
-
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
-    }
-
-    if (recordingAudioContextRef.current) {
-      recordingAudioContextRef.current.close();
-      recordingAudioContextRef.current = null;
+    if (recognitionRef.current) {
+      recognitionRef.current.abort();
+      recognitionRef.current = null;
     }
 
     if (currentSourceRef.current) {
-      try {
-        currentSourceRef.current.stop();
-      } catch {
-        // ignore
-      }
+      try { currentSourceRef.current.stop(); } catch { /* ignore */ }
       currentSourceRef.current = null;
     }
 
+    updateInterim(null);
     setIsRecording(false);
     setIsSpeaking(false);
     setStreaming(false);
-  }, [setStreaming]);
+  }, [setStreaming, updateInterim]);
 
   // 대화 히스토리 초기화
   const resetConversation = useCallback(() => {

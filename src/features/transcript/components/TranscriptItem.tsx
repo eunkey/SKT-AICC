@@ -33,17 +33,28 @@ export function TranscriptItem({ transcript }: TranscriptItemProps) {
       {/* Message Bubble */}
       <div
         className={cn(
-          'flex-1 max-w-[80%] rounded-lg px-4 py-2',
+          'flex-1 max-w-[80%] rounded-lg px-4 py-2 transition-all',
           isCustomer
             ? 'bg-slate-100 text-slate-900'
             : 'bg-primary/10 text-slate-900',
-          !transcript.isFinal && 'text-gray-400 italic'
+          !transcript.isFinal && 'opacity-70 border-2 border-dashed',
+          !transcript.isFinal && (isCustomer ? 'border-blue-300' : 'border-green-300')
         )}
       >
-        <p className="text-sm leading-relaxed">{transcript.text}</p>
+        <p className={cn(
+          'text-sm leading-relaxed',
+          !transcript.isFinal && 'text-gray-600 italic animate-pulse'
+        )}>
+          {transcript.text}
+          {!transcript.isFinal && <span className="inline-block w-1 h-4 ml-1 bg-current animate-pulse" />}
+        </p>
         <span className="text-[10px] text-muted-foreground mt-1 block">
           {format(transcript.timestamp, 'HH:mm:ss')}
-          {!transcript.isFinal && ' (인식 중...)'}
+          {!transcript.isFinal && (
+            <span className="ml-1 text-blue-600 font-medium">
+              ● 실시간 인식 중...
+            </span>
+          )}
         </span>
       </div>
     </div>

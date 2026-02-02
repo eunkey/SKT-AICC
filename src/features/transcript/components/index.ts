@@ -3,4 +3,7 @@ export { TranscriptList } from './TranscriptList';
 export { TranscriptItem } from './TranscriptItem';
 export { JumpToLiveButton } from './JumpToLiveButton';
 export { STTControls } from './STTControls';
+export { RealtimeSTTControls } from './RealtimeSTTControls';
+export { RealtimeSTTControlsFixed } from './RealtimeSTTControlsFixed';
+export { WebSpeechSTTControls } from './WebSpeechSTTControls';
 export { AIConversationControls } from './AIConversationControls';
