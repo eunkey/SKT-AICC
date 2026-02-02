@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -32,15 +33,20 @@ export function Topbar() {
       <div className="h-full px-4 flex items-center justify-between">
         {/* Left: Logo and Navigation */}
         <div className="flex items-center gap-6">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <svg width="100" height="28" viewBox="0 0 100 28" className="flex-shrink-0">
-              <text x="0" y="22" fill="#E4002B" fontSize="18" fontWeight="bold" fontFamily="Arial, sans-serif">
-                SK telecom
-              </text>
-            </svg>
-            <span className="font-semibold text-sm hidden sm:inline text-muted-foreground">
-              AI 상담 어시스턴트
-            </span>
+          <Link href="/dashboard" className="flex items-center gap-3">
+            <Image
+              src="/logo.png"
+              alt="Logo"
+              width={48}
+              height={48}
+              className="rounded-lg"
+            />
+            <div className="flex flex-col">
+              <span className="font-bold text-base text-[#E4002B]">SK telecom</span>
+              <span className="text-xs text-muted-foreground hidden sm:inline">
+                AI 상담 어시스턴트
+              </span>
+            </div>
           </Link>
 
           <nav className="hidden md:flex items-center gap-1">
