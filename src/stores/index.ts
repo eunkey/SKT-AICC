@@ -6,3 +6,4 @@ export type { TranscriptEntry } from './transcript-store';
 export { useAIAnalysisStore } from './ai-analysis-store';
 export type { AIAnalysisResult } from './ai-analysis-store';
 export { useUIStore } from './ui-store';
+export type { SelectedDocument } from './ui-store';

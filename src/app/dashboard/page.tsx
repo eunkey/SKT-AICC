@@ -1,24 +1,22 @@
 'use client';
 
 import { useState } from 'react';
-import { DashboardLayout } from '@/features/dashboard/components';
+import { DashboardLayout, CustomerInfoCard } from '@/features/dashboard/components';
 import { ConversationStream, RealtimeSTTControlsFixed, AIConversationControls } from '@/features/transcript/components';
 import { AIIntelligencePanel, AITriggerFAB } from '@/features/ai-analysis/components';
-import { DocumentSearchPanel } from '@/features/search';
+import { DocumentViewer } from '@/features/search';
 import { WrapUpModal } from '@/features/wrap-up/components';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCallStore, useUIStore, useTranscriptStore, useAIAnalysisStore } from '@/stores';
 import { useMockSTT } from '@/features/transcript/hooks/useMockSTT';
-import { Phone, PhoneOff, Pause, Play, Mic, PlayCircle, Bot, Search, Brain } from 'lucide-react';
+import { Phone, PhoneOff, Pause, Play, Mic, PlayCircle, Bot } from 'lucide-react';
 
 type STTMode = 'mock' | 'real' | 'ai';
-type RightPanelTab = 'ai' | 'search';
 
 export default function DashboardPage() {
   const [sttMode, setSTTMode] = useState<STTMode>('ai');
-  const [rightPanelTab, setRightPanelTab] = useState<RightPanelTab>('ai');
 
   const { callStatus, startCall, endCall, holdCall, resumeCall, reset } = useCallStore();
   const { openModal } = useUIStore();
@@ -195,34 +193,25 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* 메인 컨텐츠 영역 */}
+        {/* 메인 컨텐츠 영역 - 3분할 레이아웃 */}
         <div className="flex-1 p-4 overflow-hidden">
-          <div className="h-full grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Zone A: 실시간 대화 스트림 */}
-            <div className="h-full min-h-0">
-              <ConversationStream />
+          <div className="h-full grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {/* Zone A: 고객 정보 + 실시간 대화 스트림 */}
+            <div className="h-full min-h-0 flex flex-col">
+              <CustomerInfoCard />
+              <div className="flex-1 min-h-0">
+                <ConversationStream />
+              </div>
             </div>
 
-            {/* Zone B: AI 인텔리전스 / 문서 검색 패널 */}
-            <div className="h-full min-h-0 flex flex-col">
-              <Tabs value={rightPanelTab} onValueChange={(v) => setRightPanelTab(v as RightPanelTab)} className="h-full flex flex-col">
-                <TabsList className="w-full justify-start mb-2">
-                  <TabsTrigger value="ai" className="gap-1.5">
-                    <Brain className="w-4 h-4" />
-                    AI 분석
-                  </TabsTrigger>
-                  <TabsTrigger value="search" className="gap-1.5">
-                    <Search className="w-4 h-4" />
-                    문서 검색
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="ai" className="flex-1 mt-0 min-h-0">
-                  <AIIntelligencePanel />
-                </TabsContent>
-                <TabsContent value="search" className="flex-1 mt-0 min-h-0">
-                  <DocumentSearchPanel />
-                </TabsContent>
-              </Tabs>
+            {/* Zone B: AI 인텔리전스 패널 */}
+            <div className="h-full min-h-0">
+              <AIIntelligencePanel />
+            </div>
+
+            {/* Zone C: 문서 뷰어 */}
+            <div className="h-full min-h-0">
+              <DocumentViewer />
             </div>
           </div>
         </div>
@@ -231,7 +220,7 @@ export default function DashboardPage() {
       {/* AI 트리거 FAB */}
       <AITriggerFAB />
 
-      {/* Zone C: 통화 마무리 모달 */}
+      {/* 통화 마무리 모달 */}
       <WrapUpModal />
     </DashboardLayout>
   );

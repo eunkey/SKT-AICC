@@ -57,14 +57,70 @@ export function useAIConversation() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const conversationHistoryRef = useRef<ConversationMessage[]>([]);
   const playbackAudioContextRef = useRef<AudioContext | null>(null);
   const currentSourceRef = useRef<AudioBufferSourceNode | null>(null);
   const isListeningRef = useRef(false);
+  const sessionIdRef = useRef<string | null>(null);
 
   const { addTranscript, updateInterim, setStreaming } = useTranscriptStore();
+
+  // Supabase 세션 생성
+  const createSession = useCallback(async (): Promise<string | null> => {
+    try {
+      console.log('[AI대화] Supabase 세션 생성 중...');
+      const response = await fetch('/api/conversations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ counselorId: 'ai-counselor' }),
+      });
+
+      if (!response.ok) {
+        console.error('[AI대화] 세션 생성 실패');
+        return null;
+      }
+
+      const { session } = await response.json();
+      console.log('[AI대화] 세션 생성 완료:', session.id);
+      return session.id;
+    } catch (err) {
+      console.error('[AI대화] 세션 생성 오류:', err);
+      return null;
+    }
+  }, []);
+
+  // Supabase에 대화 저장
+  const saveTranscript = useCallback(async (
+    currentSessionId: string,
+    speaker: 'customer' | 'counselor',
+    text: string
+  ) => {
+    try {
+      console.log('[AI대화] 대화 저장 중...', { speaker, text: text.substring(0, 50) });
+      const response = await fetch('/api/conversations/transcript', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: currentSessionId,
+          speaker,
+          text,
+          isFinal: true,
+        }),
+      });
+
+      if (!response.ok) {
+        console.error('[AI대화] 대화 저장 실패');
+        return;
+      }
+
+      console.log('[AI대화] 대화 저장 완료');
+    } catch (err) {
+      console.error('[AI대화] 대화 저장 오류:', err);
+    }
+  }, []);
 
   // 오디오 재생용 AudioContext
   const getPlaybackAudioContext = useCallback(async (): Promise<AudioContext> => {
@@ -114,13 +170,18 @@ export function useAIConversation() {
     }
   }, [getPlaybackAudioContext]);
 
-  // AI 응답 생성 및 재생
-  const generateAndPlayResponse = useCallback(async (customerMessage: string) => {
+  // AI 응답 생성 (TTS 비활성화 - 텍스트만 표시)
+  const generateAndPlayResponse = useCallback(async (customerMessage: string, currentSessionId: string | null) => {
     setIsProcessing(true);
     console.log('[AI대화] AI 응답 생성 시작');
 
     try {
       conversationHistoryRef.current.push({ role: 'user', content: customerMessage });
+
+      // Supabase에 고객 메시지 저장
+      if (currentSessionId) {
+        saveTranscript(currentSessionId, 'customer', customerMessage);
+      }
 
       console.log('[AI대화] Chat API 호출 중...');
       const chatResponse = await fetch('/api/chat', {
@@ -151,17 +212,20 @@ export function useAIConversation() {
       };
       addTranscript(counselorEntry);
 
-      setIsProcessing(false);
+      // Supabase에 상담사 응답 저장
+      if (currentSessionId) {
+        saveTranscript(currentSessionId, 'counselor', aiResponse);
+      }
 
-      console.log('[AI대화] TTS 재생 시작');
-      await playTTSAudio(aiResponse);
+      setIsProcessing(false);
+      // TTS 비활성화 - 텍스트만 표시
 
     } catch (err) {
       console.error('[AI대화] AI 응답 오류:', err);
       setError(err instanceof Error ? err.message : 'AI response failed');
       setIsProcessing(false);
     }
-  }, [addTranscript, playTTSAudio]);
+  }, [addTranscript, saveTranscript]);
 
   // 음성 인식 시작
   const startListening = useCallback(async () => {
@@ -173,6 +237,13 @@ export function useAIConversation() {
       const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRecognitionAPI) {
         throw new Error('이 브라우저에서는 음성 인식을 지원하지 않습니다. Chrome을 사용해주세요.');
+      }
+
+      // Supabase 세션 생성
+      const newSessionId = await createSession();
+      if (newSessionId) {
+        setSessionId(newSessionId);
+        sessionIdRef.current = newSessionId;
       }
 
       // 마이크 권한 명시적 요청
@@ -236,7 +307,7 @@ export function useAIConversation() {
 
             // AI 응답 생성
             recognition.stop();
-            generateAndPlayResponse(transcript.trim()).then(() => {
+            generateAndPlayResponse(transcript.trim(), sessionIdRef.current).then(() => {
               if (isListeningRef.current) {
                 console.log('[AI대화] 음성 인식 재시작');
                 setTimeout(() => {
@@ -315,7 +386,7 @@ export function useAIConversation() {
       setIsRecording(false);
       isListeningRef.current = false;
     }
-  }, [getPlaybackAudioContext, setStreaming, addTranscript, updateInterim, generateAndPlayResponse]);
+  }, [getPlaybackAudioContext, setStreaming, addTranscript, updateInterim, generateAndPlayResponse, createSession]);
 
   // 음성 인식 중지
   const stopListening = useCallback(() => {
@@ -341,6 +412,8 @@ export function useAIConversation() {
   // 대화 히스토리 초기화
   const resetConversation = useCallback(() => {
     conversationHistoryRef.current = [];
+    sessionIdRef.current = null;
+    setSessionId(null);
     stopListening();
   }, [stopListening]);
 
@@ -349,6 +422,7 @@ export function useAIConversation() {
     isProcessing,
     isSpeaking,
     error,
+    sessionId,
     startListening,
     stopListening,
     resetConversation,

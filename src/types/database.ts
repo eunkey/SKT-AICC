@@ -43,6 +43,7 @@ export interface Database {
           summary?: string | null;
           created_at?: string;
         };
+        Relationships: [];
       };
       transcripts: {
         Row: {
@@ -69,6 +70,15 @@ export interface Database {
           is_final?: boolean;
           timestamp?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: 'transcripts_session_id_fkey';
+            columns: ['session_id'];
+            isOneToOne: false;
+            referencedRelation: 'call_sessions';
+            referencedColumns: ['id'];
+          }
+        ];
       };
       ai_analyses: {
         Row: {
@@ -98,6 +108,15 @@ export interface Database {
           recommended_script?: string | null;
           created_at?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: 'ai_analyses_session_id_fkey';
+            columns: ['session_id'];
+            isOneToOne: false;
+            referencedRelation: 'call_sessions';
+            referencedColumns: ['id'];
+          }
+        ];
       };
       sms_logs: {
         Row: {
@@ -124,11 +143,21 @@ export interface Database {
           status?: 'sent' | 'failed' | 'pending';
           sent_at?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: 'sms_logs_session_id_fkey';
+            columns: ['session_id'];
+            isOneToOne: false;
+            referencedRelation: 'call_sessions';
+            referencedColumns: ['id'];
+          }
+        ];
       };
     };
-    Views: {};
-    Functions: {};
-    Enums: {};
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
   };
 }
 
@@ -143,4 +172,5 @@ export interface RelatedDocument {
   title: string;
   url: string;
   relevance: number;
+  focusSection?: string; // 문서에서 주로 볼 부분
 }

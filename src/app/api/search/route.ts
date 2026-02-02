@@ -8,6 +8,7 @@ interface SearchResult {
   category: string;
   matchedContent: string;
   matchCount: number;
+  focusSection?: string; // 문서에서 주로 볼 섹션
 }
 
 // texts 폴더 내 모든 markdown 파일 찾기
@@ -104,6 +105,31 @@ function countMatches(content: string, keyword: string): number {
   return count;
 }
 
+// 검색어가 포함된 섹션(헤더) 추출
+function extractFocusSection(content: string, keyword: string): string | undefined {
+  const lowerContent = content.toLowerCase();
+  const lowerKeyword = keyword.toLowerCase();
+  const keywordIndex = lowerContent.indexOf(lowerKeyword);
+
+  if (keywordIndex === -1) return undefined;
+
+  // 키워드 위치 이전의 텍스트에서 가장 가까운 헤더 찾기
+  const textBefore = content.slice(0, keywordIndex);
+  const lines = textBefore.split('\n');
+
+  // 역순으로 헤더 찾기
+  for (let i = lines.length - 1; i >= 0; i--) {
+    const line = lines[i].trim();
+    // ## 또는 ### 형식의 헤더 매칭
+    const headerMatch = line.match(/^#{2,4}\s+(.+)$/);
+    if (headerMatch) {
+      return headerMatch[1].replace(/[*`]/g, '').trim();
+    }
+  }
+
+  return undefined;
+}
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const keyword = searchParams.get('q');
@@ -130,9 +156,15 @@ export async function GET(request: NextRequest) {
     const results: SearchResult[] = [];
 
     for (const filePath of markdownFiles) {
+      const relativePath = path.relative(textsPath, filePath);
+
+      // 시나리오 폴더 제외
+      if (relativePath.includes('scenarios') || relativePath.includes('scenario')) {
+        continue;
+      }
+
       // 카테고리 필터링
       if (category && category !== 'all') {
-        const relativePath = path.relative(textsPath, filePath);
         if (!relativePath.startsWith(category)) {
           continue;
         }
@@ -143,14 +175,13 @@ export async function GET(request: NextRequest) {
       const lowerKeyword = keyword.toLowerCase();
 
       if (lowerContent.includes(lowerKeyword)) {
-        const relativePath = path.relative(textsPath, filePath);
-
         results.push({
           filePath: relativePath.replace(/\\/g, '/'),
           title: extractTitle(content),
           category: extractCategory(filePath, textsPath),
           matchedContent: extractMatchedContent(content, keyword),
           matchCount: countMatches(content, keyword),
+          focusSection: extractFocusSection(content, keyword),
         });
       }
     }

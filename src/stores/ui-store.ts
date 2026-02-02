@@ -2,11 +2,18 @@ import { create } from 'zustand';
 
 type ModalType = 'wrap-up' | 'sms-preview' | 'settings' | null;
 
+export interface SelectedDocument {
+  filePath: string;
+  title: string;
+  content: string;
+}
+
 interface UIState {
   zoneBExpanded: boolean;
   activeModal: ModalType;
   sidebarOpen: boolean;
   isJumpToLiveVisible: boolean;
+  selectedDocument: SelectedDocument | null;
 
   // Actions
   toggleZoneB: () => void;
@@ -16,6 +23,7 @@ interface UIState {
   toggleSidebar: () => void;
   setSidebarOpen: (open: boolean) => void;
   setJumpToLiveVisible: (visible: boolean) => void;
+  setSelectedDocument: (doc: SelectedDocument | null) => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
@@ -23,6 +31,7 @@ export const useUIStore = create<UIState>((set) => ({
   activeModal: null,
   sidebarOpen: false,
   isJumpToLiveVisible: false,
+  selectedDocument: null,
 
   toggleZoneB: () =>
     set((state) => ({ zoneBExpanded: !state.zoneBExpanded })),
@@ -39,4 +48,6 @@ export const useUIStore = create<UIState>((set) => ({
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
 
   setJumpToLiveVisible: (visible) => set({ isJumpToLiveVisible: visible }),
+
+  setSelectedDocument: (doc) => set({ selectedDocument: doc }),
 }));
