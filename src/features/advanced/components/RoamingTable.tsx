@@ -15,138 +15,163 @@ import {
 interface RoamingPlan {
   id: string;
   name: string;
-  region: string;
-  countries: string;
+  category: string;
+  coverage: string;
   data: string;
+  voice: string;
+  sms: string;
   validity: string;
   price: string;
-  autoConnect: boolean;
+  features: string;
 }
 
 const ROAMING_PLANS: RoamingPlan[] = [
-  // 아시아 로밍
+  // ── T 로밍 baro 요금제 ──
   {
-    id: 'roaming-asia-unlimited',
-    name: '아시아 무제한 로밍',
-    region: '아시아',
-    countries: '일본, 중국, 태국, 베트남 등 20개국',
-    data: '무제한',
-    validity: '24시간',
-    price: '9,900원/일',
-    autoConnect: true,
+    id: 'baro-3gb',
+    name: 'baro 3GB',
+    category: 'baro',
+    coverage: '전세계 70여 개국',
+    data: '3GB',
+    voice: '30분',
+    sms: '30건',
+    validity: '사용일 기준',
+    price: '33,000원',
+    features: '단기 출장/여행',
   },
   {
-    id: 'roaming-asia-basic',
-    name: '아시아 베이직 로밍',
-    region: '아시아',
-    countries: '일본, 중국, 태국, 베트남 등 20개국',
-    data: '500MB',
-    validity: '24시간',
-    price: '5,500원/일',
-    autoConnect: true,
-  },
-  {
-    id: 'roaming-japan-special',
-    name: '일본 전용 로밍',
-    region: '아시아',
-    countries: '일본',
-    data: '무제한',
-    validity: '5일',
-    price: '39,000원',
-    autoConnect: true,
-  },
-  {
-    id: 'roaming-china-special',
-    name: '중국 전용 로밍',
-    region: '아시아',
-    countries: '중국, 홍콩, 마카오',
-    data: '무제한',
-    validity: '5일',
-    price: '35,000원',
-    autoConnect: true,
-  },
-  // 유럽 로밍
-  {
-    id: 'roaming-europe-unlimited',
-    name: '유럽 무제한 로밍',
-    region: '유럽',
-    countries: '영국, 프랑스, 독일, 이탈리아 등 30개국',
-    data: '무제한',
-    validity: '24시간',
-    price: '11,900원/일',
-    autoConnect: true,
-  },
-  {
-    id: 'roaming-europe-weekly',
-    name: '유럽 7일 패키지',
-    region: '유럽',
-    countries: '영국, 프랑스, 독일 등 30개국',
-    data: '5GB',
-    validity: '7일',
+    id: 'baro-6gb',
+    name: 'baro 6GB',
+    category: 'baro',
+    coverage: '전세계 70여 개국',
+    data: '6GB',
+    voice: '60분',
+    sms: '30건',
+    validity: '사용일 기준',
     price: '55,000원',
-    autoConnect: true,
+    features: '중기 여행',
   },
-  // 미주 로밍
   {
-    id: 'roaming-americas-unlimited',
-    name: '미주 무제한 로밍',
-    region: '미주',
-    countries: '미국, 캐나다',
-    data: '무제한',
-    validity: '24시간',
+    id: 'baro-12gb',
+    name: 'baro 12GB',
+    category: 'baro',
+    coverage: '전세계 70여 개국',
+    data: '12GB',
+    voice: '120분',
+    sms: '50건',
+    validity: '사용일 기준',
+    price: '77,000원',
+    features: '장기 여행/출장',
+  },
+  {
+    id: 'baro-24gb',
+    name: 'baro 24GB',
+    category: 'baro',
+    coverage: '전세계 70여 개국',
+    data: '24GB',
+    voice: '240분',
+    sms: '100건',
+    validity: '사용일 기준',
+    price: '110,000원',
+    features: '장기 체류',
+  },
+  // ── T 로밍 OnePass ──
+  {
+    id: 'onepass-500',
+    name: 'OnePass 500',
+    category: 'OnePass',
+    coverage: '전세계 70여 개국',
+    data: '500MB/일',
+    voice: '사용량 차감',
+    sms: '사용량 차감',
+    validity: '일 단위 자동 적용',
+    price: '9,900원/일',
+    features: '가벼운 일일 사용',
+  },
+  {
+    id: 'onepass-data-vip',
+    name: 'OnePass Data VIP',
+    category: 'OnePass',
+    coverage: '전세계 70여 개국',
+    data: '무제한/일',
+    voice: '사용량 차감',
+    sms: '사용량 차감',
+    validity: '일 단위 자동 적용',
     price: '14,900원/일',
-    autoConnect: true,
+    features: '데이터 무제한',
   },
   {
-    id: 'roaming-americas',
-    name: '미주 기본 로밍',
-    region: '미주',
-    countries: '미국, 캐나다, 멕시코',
+    id: 'onepass-vip',
+    name: 'OnePass VIP',
+    category: 'OnePass',
+    coverage: '전세계 70여 개국',
+    data: '무제한/일',
+    voice: '무제한/일',
+    sms: '무제한/일',
+    validity: '일 단위 자동 적용',
+    price: '19,800원/일',
+    features: '올인원 무제한',
+  },
+  // ── T 로밍 eSIM ──
+  {
+    id: 'esim-1gb',
+    name: 'eSIM 1GB',
+    category: 'eSIM',
+    coverage: '주요 50여 개국',
     data: '1GB',
-    validity: '24시간',
-    price: '12,900원/일',
-    autoConnect: true,
-  },
-  {
-    id: 'roaming-usa-weekly',
-    name: '미국 7일 패키지',
-    region: '미주',
-    countries: '미국',
-    data: '5GB',
-    validity: '7일',
-    price: '65,000원',
-    autoConnect: true,
-  },
-  // 글로벌/기타
-  {
-    id: 'roaming-global',
-    name: '글로벌 무제한 로밍',
-    region: '전세계',
-    countries: '전세계 120개국',
-    data: '무제한',
-    validity: '7일',
-    price: '89,000원/주',
-    autoConnect: true,
-  },
-  {
-    id: 'roaming-global-monthly',
-    name: '글로벌 월정액 로밍',
-    region: '전세계',
-    countries: '전세계 120개국',
-    data: '무제한',
+    voice: '미포함',
+    sms: '미포함',
     validity: '30일',
-    price: '199,000원/월',
-    autoConnect: true,
+    price: '11,000원',
+    features: '데이터 전용, 듀얼심',
   },
   {
-    id: 'roaming-baro',
-    name: 'T 바로로밍',
-    region: '전세계',
-    countries: '전세계 대부분 국가',
-    data: '건별 과금',
-    validity: '사용시',
-    price: '2.5원/KB',
-    autoConnect: false,
+    id: 'esim-3gb',
+    name: 'eSIM 3GB',
+    category: 'eSIM',
+    coverage: '주요 50여 개국',
+    data: '3GB',
+    voice: '미포함',
+    sms: '미포함',
+    validity: '30일',
+    price: '22,000원',
+    features: '데이터 전용, 듀얼심',
+  },
+  {
+    id: 'esim-5gb',
+    name: 'eSIM 5GB',
+    category: 'eSIM',
+    coverage: '주요 50여 개국',
+    data: '5GB',
+    voice: '미포함',
+    sms: '미포함',
+    validity: '30일',
+    price: '33,000원',
+    features: '데이터 전용, 듀얼심',
+  },
+  {
+    id: 'esim-10gb',
+    name: 'eSIM 10GB',
+    category: 'eSIM',
+    coverage: '주요 50여 개국',
+    data: '10GB',
+    voice: '미포함',
+    sms: '미포함',
+    validity: '30일',
+    price: '44,000원',
+    features: '데이터 전용, 듀얼심',
+  },
+  {
+    id: 'esim-unlimited',
+    name: 'eSIM 무제한',
+    category: 'eSIM',
+    coverage: '주요 50여 개국',
+    data: '무제한',
+    voice: '미포함',
+    sms: '미포함',
+    validity: '30일',
+    price: '55,000원',
+    features: '데이터 전용, 듀얼심',
   },
 ];
 
@@ -174,14 +199,15 @@ export function RoamingTable({ selectedRoaming = [], onSelect }: RoamingTablePro
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>로밍 상품명</TableHead>
-            <TableHead>지역</TableHead>
-            <TableHead>제공 국가</TableHead>
-            <TableHead>데이터</TableHead>
-            <TableHead>유효기간</TableHead>
-            <TableHead>요금</TableHead>
-            <TableHead>자동연결</TableHead>
-            <TableHead className="text-right">선택</TableHead>
+            <TableHead className="whitespace-nowrap">상품명</TableHead>
+            <TableHead className="whitespace-nowrap">유형</TableHead>
+            <TableHead className="whitespace-nowrap">커버리지</TableHead>
+            <TableHead className="whitespace-nowrap">데이터</TableHead>
+            <TableHead className="whitespace-nowrap">음성/SMS</TableHead>
+            <TableHead className="whitespace-nowrap">유효기간</TableHead>
+            <TableHead className="whitespace-nowrap">요금</TableHead>
+            <TableHead className="whitespace-nowrap">특징</TableHead>
+            <TableHead className="text-right whitespace-nowrap">선택</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -192,26 +218,28 @@ export function RoamingTable({ selectedRoaming = [], onSelect }: RoamingTablePro
                 key={plan.id}
                 className={isSelected ? 'bg-muted/50' : ''}
               >
-                <TableCell className="font-medium">{plan.name}</TableCell>
+                <TableCell className="font-medium text-xs whitespace-nowrap">{plan.name}</TableCell>
                 <TableCell>
-                  <Badge variant="outline">{plan.region}</Badge>
+                  <Badge
+                    variant={plan.category === 'baro' ? 'default' : 'secondary'}
+                    className="text-[10px] whitespace-nowrap"
+                  >
+                    {plan.category}
+                  </Badge>
                 </TableCell>
-                <TableCell className="max-w-xs">
-                  <div className="text-xs text-muted-foreground truncate">
-                    {plan.countries}
+                <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                  {plan.coverage}
+                </TableCell>
+                <TableCell className="text-xs whitespace-nowrap">{plan.data}</TableCell>
+                <TableCell className="text-xs whitespace-nowrap">
+                  {plan.voice} / {plan.sms}
+                </TableCell>
+                <TableCell className="text-xs whitespace-nowrap">{plan.validity}</TableCell>
+                <TableCell className="font-semibold text-xs whitespace-nowrap">{plan.price}</TableCell>
+                <TableCell>
+                  <div className="text-[11px] text-muted-foreground whitespace-nowrap">
+                    {plan.features}
                   </div>
-                </TableCell>
-                <TableCell>{plan.data}</TableCell>
-                <TableCell>{plan.validity}</TableCell>
-                <TableCell className="font-semibold">{plan.price}</TableCell>
-                <TableCell>
-                  {plan.autoConnect ? (
-                    <Badge variant="default" className="bg-green-500">
-                      자동
-                    </Badge>
-                  ) : (
-                    <Badge variant="secondary">수동</Badge>
-                  )}
                 </TableCell>
                 <TableCell className="text-right">
                   <Button

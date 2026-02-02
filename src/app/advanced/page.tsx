@@ -277,7 +277,7 @@ export default function AdvancedPage() {
                           currentPlan={
                             selectedScenario?.plans.find(
                               (p) => p.id === selectedScenario.selectedPlanId
-                            )?.name || '5G 프리미엄'
+                            )?.name || '5GX 프라임'
                           }
                         />
                       </TabsContent>
@@ -294,14 +294,14 @@ export default function AdvancedPage() {
                             currentPlan={
                               selectedScenario?.plans.find(
                                 (p) => p.id === selectedScenario.selectedPlanId
-                              )?.name || '5G 프리미엄'
+                              )?.name || '5GX 프라임'
                             }
                           />
                         </div>
                         <div>
                           <h3 className="text-sm font-semibold mb-3">요금제 선택</h3>
                           <PlanTable
-                            currentPlanId={selectedScenario?.selectedPlanId || '5g-premium'}
+                            currentPlanId={selectedScenario?.selectedPlanId || '5gx-prime'}
                             extendedPlans={selectedScenario?.plans}
                             onAnalyze={handleAnalyzePlan}
                           />

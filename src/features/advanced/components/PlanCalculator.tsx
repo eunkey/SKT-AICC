@@ -10,10 +10,12 @@ import { useTranscriptStore } from '@/stores';
 
 // ── 요금제 데이터 ──
 
+type PlanCategory = '5GX' | '0청년' | '베이직' | '시니어' | '청소년';
+
 interface Plan {
   id: string;
   name: string;
-  type: '5G' | 'LTE';
+  category: PlanCategory;
   data: string;
   dataGB: number; // 비교용 GB 수치 (무제한=999)
   voice: string;
@@ -24,79 +26,182 @@ interface Plan {
 }
 
 const PLANS: Plan[] = [
+  // ── 5GX 플랜 ──
   {
-    id: '5g-premium',
-    name: '5G 프리미엄',
-    type: '5G',
-    data: '무제한',
+    id: '5gx-platinum',
+    name: '5GX 플래티넘',
+    category: '5GX',
+    data: '무제한 (테더링 120GB)',
+    dataGB: 999,
+    voice: '무제한',
+    message: '무제한',
+    price: 125000,
+    priceLabel: '125,000원',
+    features: ['최고급 콘텐츠', '멤버십 혜택', '테더링 120GB'],
+  },
+  {
+    id: '5gx-premium',
+    name: '5GX 프리미엄',
+    category: '5GX',
+    data: '무제한 (100GB)',
+    dataGB: 999,
+    voice: '무제한',
+    message: '무제한',
+    price: 109000,
+    priceLabel: '109,000원',
+    features: ['넷플릭스/콘텐츠 옵션', '데이터 무제한'],
+  },
+  {
+    id: '5gx-prime-plus',
+    name: '5GX 프라임플러스',
+    category: '5GX',
+    data: '무제한 (80GB)',
+    dataGB: 999,
+    voice: '무제한',
+    message: '무제한',
+    price: 99000,
+    priceLabel: '99,000원',
+    features: ['콘텐츠 선택형', '데이터 무제한'],
+  },
+  {
+    id: '5gx-prime',
+    name: '5GX 프라임',
+    category: '5GX',
+    data: '무제한 (60GB)',
     dataGB: 999,
     voice: '무제한',
     message: '무제한',
     price: 89000,
     priceLabel: '89,000원',
-    features: ['5G 최고 속도', '데이터 무제한', '영상/음악 무제한'],
+    features: ['기본 5G 혜택', '데이터 무제한'],
   },
+  // ── 0 청년 (만 34세 이하) ──
   {
-    id: '5g-standard',
-    name: '5G 스탠다드',
-    type: '5G',
-    data: '100GB',
-    dataGB: 100,
+    id: 'young-79',
+    name: '0 청년 79',
+    category: '0청년',
+    data: '300GB + 5Mbps',
+    dataGB: 300,
     voice: '무제한',
     message: '무제한',
-    price: 69000,
-    priceLabel: '69,000원',
-    features: ['5G 고속', '데이터 100GB', '영상/음악 제공'],
+    price: 79000,
+    priceLabel: '79,000원',
+    features: ['만 34세 이하', '데이터 중심', '소진 후 5Mbps'],
   },
   {
-    id: '5g-slim',
-    name: '5G 슬림',
-    type: '5G',
-    data: '12GB',
-    dataGB: 12,
+    id: 'young-59',
+    name: '0 청년 59',
+    category: '0청년',
+    data: '36GB + 1Mbps',
+    dataGB: 36,
     voice: '무제한',
     message: '무제한',
-    price: 49000,
-    priceLabel: '49,000원',
-    features: ['5G 기본', '데이터 12GB'],
+    price: 59000,
+    priceLabel: '59,000원',
+    features: ['만 34세 이하', '라이트 사용자', '소진 후 1Mbps'],
   },
   {
-    id: 'lte-premium',
-    name: 'LTE 프리미엄',
-    type: 'LTE',
-    data: '무제한',
-    dataGB: 999,
-    voice: '무제한',
-    message: '무제한',
-    price: 69000,
-    priceLabel: '69,000원',
-    features: ['LTE 최고 속도', '데이터 무제한'],
-  },
-  {
-    id: 'lte-standard',
-    name: 'LTE 스탠다드',
-    type: 'LTE',
-    data: '50GB',
-    dataGB: 50,
+    id: 'young-49',
+    name: '0 청년 49',
+    category: '0청년',
+    data: '15GB',
+    dataGB: 15,
     voice: '무제한',
     message: '무제한',
     price: 49000,
     priceLabel: '49,000원',
-    features: ['LTE 고속', '데이터 50GB'],
+    features: ['만 34세 이하', '기본형'],
+  },
+  // ── 베이직 / 컴팩트 ──
+  {
+    id: 'basic-plus',
+    name: '베이직플러스',
+    category: '베이직',
+    data: '24GB + 1Mbps',
+    dataGB: 24,
+    voice: '무제한',
+    message: '무제한',
+    price: 59000,
+    priceLabel: '59,000원',
+    features: ['기본형', '소진 후 1Mbps'],
   },
   {
-    id: 'lte-basic',
-    name: 'LTE 베이직',
-    type: 'LTE',
+    id: 'basic',
+    name: '베이직',
+    category: '베이직',
+    data: '11GB',
+    dataGB: 11,
+    voice: '무제한',
+    message: '무제한',
+    price: 49000,
+    priceLabel: '49,000원',
+    features: ['부담 낮은 기본형'],
+  },
+  {
+    id: 'slim',
+    name: '슬림',
+    category: '베이직',
+    data: '15GB + 1Mbps',
+    dataGB: 15,
+    voice: '무제한',
+    message: '무제한',
+    price: 55000,
+    priceLabel: '55,000원',
+    features: ['소진 후 1Mbps'],
+  },
+  {
+    id: 'compact',
+    name: '컴팩트',
+    category: '베이직',
+    data: '6GB + 400Kbps',
+    dataGB: 6,
+    voice: '무제한',
+    message: '무제한',
+    price: 39000,
+    priceLabel: '39,000원',
+    features: ['저용량형', '소진 후 400Kbps'],
+  },
+  // ── 시니어 (65세 이상) ──
+  {
+    id: 'senior-a',
+    name: '시니어 A',
+    category: '시니어',
+    data: '10GB',
+    dataGB: 10,
+    voice: '무제한',
+    message: '무제한',
+    price: 45000,
+    priceLabel: '45,000원',
+    features: ['65세 이상', '안심케어'],
+  },
+  {
+    id: 'senior-c',
+    name: '시니어 C',
+    category: '시니어',
     data: '8GB',
     dataGB: 8,
     voice: '무제한',
     message: '무제한',
-    price: 35000,
-    priceLabel: '35,000원',
-    features: ['LTE 기본', '데이터 8GB'],
+    price: 42000,
+    priceLabel: '42,000원',
+    features: ['65세 이상', '경제형'],
+  },
+  // ── 청소년 ──
+  {
+    id: 'teen-5g',
+    name: '0틴 5G',
+    category: '청소년',
+    data: '9GB',
+    dataGB: 9,
+    voice: '무제한',
+    message: '무제한',
+    price: 45000,
+    priceLabel: '45,000원',
+    features: ['청소년 전용', '유해차단'],
   },
 ];
+
+const PLAN_CATEGORIES: PlanCategory[] = ['5GX', '0청년', '베이직', '시니어', '청소년'];
 
 // ── 부가서비스 데이터 ──
 
@@ -110,16 +215,27 @@ interface AddonService {
 }
 
 const ADDON_SERVICES: AddonService[] = [
-  { id: 'addon-caller-id', name: '발신번호 표시', category: '통화', price: 0, priceLabel: '무료', isFree: true },
-  { id: 'addon-call-waiting', name: '통화 대기', category: '통화', price: 0, priceLabel: '무료', isFree: true },
-  { id: 'addon-voicemail', name: '음성사서함', category: '통화', price: 0, priceLabel: '무료', isFree: true },
-  { id: 'addon-spam-block', name: '스팸차단 프리미엄', category: '보안', price: 3300, priceLabel: '3,300원', isFree: false },
-  { id: 'addon-data-rollover', name: '데이터 롤오버', category: '데이터', price: 1100, priceLabel: '1,100원', isFree: false },
-  { id: 'addon-family-share', name: '가족 데이터 쉐어링', category: '데이터', price: 2200, priceLabel: '2,200원', isFree: false },
-  { id: 'addon-tmap', name: 'T map 무료', category: '앱', price: 0, priceLabel: '무료', isFree: true },
-  { id: 'addon-music', name: 'FLO 음악', category: '앱', price: 0, priceLabel: '무료', isFree: true },
-  { id: 'addon-ott', name: 'OTT 멤버십', category: '앱', price: 5500, priceLabel: '5,500원', isFree: false },
-  { id: 'addon-insurance', name: '휴대폰 보험', category: '보험', price: 8800, priceLabel: '8,800원', isFree: false },
+  // 통화
+  { id: 'addon-smart-callkeeper', name: '스마트 콜키퍼', category: '통화', price: 990, priceLabel: '990원', isFree: false },
+  { id: 'addon-callkeeper', name: '콜키퍼', category: '통화', price: 550, priceLabel: '550원', isFree: false },
+  { id: 'addon-perfect-call', name: '퍼펙트콜', category: '통화', price: 990, priceLabel: '990원', isFree: false },
+  { id: 'addon-v-coloring', name: 'V 컬러링', category: '통화', price: 3300, priceLabel: '3,300원', isFree: false },
+  // 콘텐츠
+  { id: 'addon-flo-data', name: 'FLO 앤 데이터', category: '콘텐츠', price: 7900, priceLabel: '7,900원', isFree: false },
+  { id: 'addon-wavve-data', name: 'Wavve 앤 데이터', category: '콘텐츠', price: 9900, priceLabel: '9,900원', isFree: false },
+  { id: 'addon-onestory-data', name: '원스토리 앤 데이터', category: '콘텐츠', price: 6500, priceLabel: '6,500원', isFree: false },
+  // 데이터
+  { id: 'addon-lte-safety', name: 'LTE 안심옵션', category: '데이터', price: 5500, priceLabel: '5,500원', isFree: false },
+  { id: 'addon-data-charge-4gb', name: '데이터 충전 4GB', category: '데이터', price: 3000, priceLabel: '3,000원', isFree: false },
+  { id: 'addon-safe-data-100', name: '안심데이터 100', category: '데이터', price: 11000, priceLabel: '11,000원', isFree: false },
+  // 보안
+  { id: 'addon-smart-safe-pay', name: '스마트안전결제', category: '보안', price: 990, priceLabel: '990원', isFree: false },
+  { id: 'addon-phone-lost', name: '휴대폰 분실보호', category: '보안', price: 2200, priceLabel: '2,200원', isFree: false },
+  { id: 'addon-pay-password', name: '휴대폰결제 비밀번호', category: '보안', price: 0, priceLabel: '무료', isFree: true },
+  // 보험
+  { id: 'addon-t-allcare-6', name: 'T 올케어+6', category: '보험', price: 8500, priceLabel: '8,500원', isFree: false },
+  { id: 'addon-insurance-iphone', name: '분실파손6 i일반', category: '보험', price: 5400, priceLabel: '5,400원', isFree: false },
+  { id: 'addon-insurance-fold', name: '분실파손6 폴드', category: '보험', price: 11900, priceLabel: '11,900원', isFree: false },
 ];
 
 // ── 할인 데이터 ──
@@ -145,12 +261,12 @@ const DISCOUNTS: Discount[] = [
   { id: 'discount-paperless', name: '전자 청구서', type: '납부', discountAmount: 550, discountLabel: '550원', isPercentage: false, percentage: 0 },
 ];
 
-const ADDON_CATEGORIES = ['통화', '보안', '데이터', '앱', '보험'] as const;
+const ADDON_CATEGORIES = ['통화', '콘텐츠', '데이터', '보안', '보험'] as const;
 const DISCOUNT_TYPES = ['약정', '결합', '납부'] as const;
 
 // ── 현재 고객 요금제 (하드코딩) ──
 
-const CURRENT_PLAN_ID = '5g-premium';
+const CURRENT_PLAN_ID = '5gx-prime';
 const CURRENT_PLAN = PLANS.find((p) => p.id === CURRENT_PLAN_ID)!;
 
 // ── 고객 사용 이력 데이터 ──
@@ -180,9 +296,9 @@ interface CustomerUsage {
 const CUSTOMER_USAGE: CustomerUsage = {
   memberSince: '2019년 3월',
   planHistory: [
-    { planName: 'LTE 스탠다드', period: '2019.03 ~ 2021.05', durationMonths: 26 },
-    { planName: 'LTE 프리미엄', period: '2021.06 ~ 2023.02', durationMonths: 21 },
-    { planName: '5G 프리미엄', period: '2023.03 ~ 현재', durationMonths: 35 },
+    { planName: '베이직', period: '2019.03 ~ 2021.05', durationMonths: 26 },
+    { planName: '0 청년 59', period: '2021.06 ~ 2023.02', durationMonths: 21 },
+    { planName: '5GX 프라임', period: '2023.03 ~ 현재', durationMonths: 35 },
   ],
   recentUsage: [
     { month: '2025.07', dataUsedGB: 23.4, callMinutes: 187, messageSent: 42 },
@@ -214,8 +330,8 @@ function getAIRecommendations(transcript: string): AIRecommendationResult {
   // 대화에서 키워드 감지
   const needsMoreData = ['데이터 부족', '데이터가 부족', '데이터 많이', '데이터가 모자', '데이터 다 써', '데이터 더'].some((kw) => text.includes(kw));
   const wantsCheaper = ['비싸', '저렴', '싸게', '할인', '절약', '요금이 높', '요금 낮', '부담'].some((kw) => text.includes(kw));
-  const wants5G = ['5g', '5지', '속도 빠른', '속도가 빠', '빠른 속도'].some((kw) => text.includes(kw));
-  const wantsLTE = ['lte', 'LTE', '엘티이'].some((kw) => text.includes(kw));
+  const wantsPremium = ['5g', '5지', '프리미엄', '플래티넘', '프라임', '속도 빠른', '속도가 빠', '빠른 속도', '무제한'].some((kw) => text.includes(kw));
+  const wantsYoung = ['청년', '젊', '0청년', '영', '2030'].some((kw) => text.includes(kw));
 
   // 1) 요금이 비싸다 → 사용량 기준으로 데이터 충분한 요금제 중 저렴한 것
   if (wantsCheaper) {
@@ -245,19 +361,19 @@ function getAIRecommendations(transcript: string): AIRecommendationResult {
     };
   }
 
-  // 3) 5G/LTE 선호
-  if (wants5G) {
-    const plans = PLANS.filter((p) => p.type === '5G' && p.dataGB >= recommendedDataGB).slice(0, 3);
+  // 3) 프리미엄/청년 선호
+  if (wantsPremium) {
+    const plans = PLANS.filter((p) => p.category === '5GX' && p.dataGB >= recommendedDataGB).slice(0, 3);
     return {
-      plans: plans.length > 0 ? plans : PLANS.filter((p) => p.type === '5G').slice(0, 3),
-      reason: `5G 요금제 중 월 사용량(${avgDataGB}GB) 커버 가능한 요금제`,
+      plans: plans.length > 0 ? plans : PLANS.filter((p) => p.category === '5GX').slice(0, 3),
+      reason: `5GX 프리미엄 요금제 중 월 사용량(${avgDataGB}GB) 커버 가능한 요금제`,
     };
   }
-  if (wantsLTE) {
-    const plans = PLANS.filter((p) => p.type === 'LTE' && p.dataGB >= recommendedDataGB).slice(0, 3);
+  if (wantsYoung) {
+    const plans = PLANS.filter((p) => p.category === '0청년' && p.dataGB >= recommendedDataGB).slice(0, 3);
     return {
-      plans: plans.length > 0 ? plans : PLANS.filter((p) => p.type === 'LTE').slice(0, 3),
-      reason: `LTE 요금제 중 월 사용량(${avgDataGB}GB) 커버 가능한 요금제`,
+      plans: plans.length > 0 ? plans : PLANS.filter((p) => p.category === '0청년').slice(0, 3),
+      reason: `0 청년 요금제 중 월 사용량(${avgDataGB}GB) 커버 가능한 요금제 (만 34세 이하)`,
     };
   }
 
@@ -305,7 +421,7 @@ export function PlanCalculator() {
     return PLANS.filter(
       (p) =>
         p.name.toLowerCase().includes(q) ||
-        p.type.toLowerCase().includes(q) ||
+        p.category.toLowerCase().includes(q) ||
         p.priceLabel.includes(q) ||
         p.data.includes(q)
     );
@@ -526,8 +642,8 @@ export function PlanCalculator() {
                   </Badge>
                 )}
                 <div className="flex items-center gap-1.5 mb-1">
-                  <Badge variant={plan.type === '5G' ? 'default' : 'secondary'} className="text-[10px] px-1.5 py-0">
-                    {plan.type}
+                  <Badge variant={plan.category === '5GX' ? 'default' : 'secondary'} className="text-[10px] px-1.5 py-0">
+                    {plan.category}
                   </Badge>
                   <span className="text-sm font-semibold">{plan.name}</span>
                 </div>
