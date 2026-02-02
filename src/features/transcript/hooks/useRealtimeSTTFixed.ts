@@ -136,9 +136,13 @@ export function useRealtimeSTTFixed(options: UseRealtimeSTTFixedOptions) {
       }
 
       const tokenData = await tokenResponse.json();
-      const ephemeralKey = tokenData.value;
+      console.log(`[${speaker}] Token response:`, tokenData);
+
+      // OpenAI Realtime API는 client_secret.value로 반환
+      const ephemeralKey = tokenData.client_secret?.value || tokenData.value;
 
       if (!ephemeralKey) {
+        console.error(`[${speaker}] Token data structure:`, JSON.stringify(tokenData, null, 2));
         throw new Error('No ephemeral key received');
       }
 

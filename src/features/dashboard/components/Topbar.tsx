@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { History, LogOut, Settings } from 'lucide-react';
+import { History, LogOut, Settings, UserCog } from 'lucide-react';
 import { useAuthStore, useCallStore } from '@/stores';
 import { CallStatusIndicator } from './CallStatusIndicator';
 import { CustomerInfoBadge } from './CustomerInfoBadge';
@@ -52,6 +52,12 @@ export function Topbar() {
           <nav className="hidden md:flex items-center gap-1">
             <Button variant="ghost" size="sm" asChild>
               <Link href="/dashboard">대시보드</Link>
+            </Button>
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/advanced">
+                <UserCog className="w-4 h-4 mr-1" />
+                고객관리
+              </Link>
             </Button>
             <Button variant="ghost" size="sm" asChild>
               <Link href="/history">

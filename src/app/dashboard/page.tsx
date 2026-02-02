@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { DashboardLayout, CustomerInfoCard } from '@/features/dashboard/components';
-import { ConversationStream, RealtimeSTTControlsFixed, AIConversationControls } from '@/features/transcript/components';
+import { ConversationStream, AIConversationControls } from '@/features/transcript/components';
 import { AIIntelligencePanel, AITriggerFAB } from '@/features/ai-analysis/components';
 import { DocumentViewer } from '@/features/search';
 import { WrapUpModal } from '@/features/wrap-up/components';
@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCallStore, useUIStore, useTranscriptStore, useAIAnalysisStore } from '@/stores';
 import { useMockSTT } from '@/features/transcript/hooks/useMockSTT';
-import { Phone, PhoneOff, Pause, Play, Mic, PlayCircle, Bot } from 'lucide-react';
+import { Phone, PhoneOff, Pause, Play, PlayCircle, Bot } from 'lucide-react';
 
 type STTMode = 'mock' | 'real' | 'ai';
 
@@ -80,9 +80,9 @@ export default function DashboardPage() {
     switch (sttMode) {
       case 'mock':
         return '데모 모드: 요금제 변경 시나리오 재생';
-      case 'real':
-        return '실시간 모드: OpenAI Realtime API (스트리밍 전사)';
       case 'ai':
+        return 'AI 대화 모드: 고객 음성 → AI 상담사 응답';
+      default:
         return 'AI 대화 모드: 고객 음성 → AI 상담사 응답';
     }
   };
@@ -105,10 +105,6 @@ export default function DashboardPage() {
                     <TabsTrigger value="mock" className="text-xs gap-1.5">
                       <PlayCircle className="w-3.5 h-3.5" />
                       데모
-                    </TabsTrigger>
-                    <TabsTrigger value="real" className="text-xs gap-1.5">
-                      <Mic className="w-3.5 h-3.5" />
-                      실시간
                     </TabsTrigger>
                   </TabsList>
                 </Tabs>
@@ -170,11 +166,6 @@ export default function DashboardPage() {
                       </>
                     )}
                   </Button>
-                )}
-
-                {/* Real 모드: 실시간 STT 컨트롤 (OpenAI Realtime API) */}
-                {sttMode === 'real' && (
-                  <RealtimeSTTControlsFixed isCallActive={isCallActive} />
                 )}
 
                 {/* AI 대화 모드: AI 대화 컨트롤 */}
