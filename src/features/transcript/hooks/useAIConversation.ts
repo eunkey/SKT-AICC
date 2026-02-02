@@ -309,7 +309,7 @@ export function useAIConversation() {
             recognition.stop();
             generateAndPlayResponse(transcript.trim(), sessionIdRef.current).then(() => {
               if (isListeningRef.current) {
-                console.log('[AI대화] 음성 인식 재시작');
+                console.log('[AI대화] 음성 인식 재시작 (4초 후)');
                 setTimeout(() => {
                   if (isListeningRef.current) {
                     try {
@@ -318,7 +318,7 @@ export function useAIConversation() {
                       console.log('[AI대화] 재시작 중 오류:', e);
                     }
                   }
-                }, 100);
+                }, 4000); // 4초 대기 후 재시작
               }
             });
           } else {
