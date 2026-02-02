@@ -9,10 +9,21 @@ interface MockConversationItem {
   delay: number;
 }
 
+export interface DemoCustomerInfo {
+  name: string;
+  phone: string;
+  customerId: string;
+  plan: string;
+  planPrice: string;
+  contractType?: string;
+  services?: string[];
+}
+
 export interface DemoScenarioConfig {
   id: string;
   name: string;
   description: string;
+  customerInfo: DemoCustomerInfo;
   conversation: MockConversationItem[];
 }
 
@@ -96,24 +107,57 @@ export const DEMO_SCENARIOS: DemoScenarioConfig[] = [
     id: 'plan-change',
     name: '요금제 변경',
     description: '5G 프라임 → 5G 슬림 다운그레이드',
+    customerInfo: {
+      name: '김민수',
+      phone: '010-1234-5678',
+      customerId: 'SKT-001',
+      plan: '5G 프라임',
+      planPrice: '69,000원',
+    },
     conversation: planChangeConversation,
   },
   {
     id: 'premium-cancel',
     name: '프리미엄 약정 해지',
     description: '5G 프리미엄 + 24개월 약정 해지 문의 (위약금 발생)',
+    customerInfo: {
+      name: '김민수',
+      phone: '010-9876-5432',
+      customerId: 'SKT-002',
+      plan: '5G 프리미엄',
+      planPrice: '89,000원',
+      contractType: '24개월 약정 (14개월 남음)',
+      services: ['FLO 무제한', 'wavve 프리미엄'],
+    },
     conversation: premiumCancelConversation,
   },
   {
     id: 'ott-cancel',
     name: 'OTT 서비스 정리',
     description: '넷플릭스 + 디즈니+ + 유튜브 정리 (즉시 절감)',
+    customerInfo: {
+      name: '이영희',
+      phone: '010-5555-1234',
+      customerId: 'SKT-003',
+      plan: '5G 슬림',
+      planPrice: '49,000원',
+      services: ['넷플릭스', '디즈니+', '유튜브 프리미엄'],
+    },
     conversation: ottCancelConversation,
   },
   {
     id: 'family-cancel',
     name: '가족 결합 해지',
     description: '4인 가족 결합 + 트리플 결합 해지 (연쇄 효과)',
+    customerInfo: {
+      name: '박철수',
+      phone: '010-7777-8888',
+      customerId: 'SKT-004',
+      plan: '5G 스탠다드 플러스',
+      planPrice: '79,000원',
+      contractType: '24개월 약정 (8개월 남음)',
+      services: ['4인 가족 결합', '인터넷 결합', 'TV 결합', '트리플 결합'],
+    },
     conversation: familyCancelConversation,
   },
 ];

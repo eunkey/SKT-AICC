@@ -36,15 +36,27 @@ export default function DashboardPage() {
   const handleStartCall = () => {
     clearTranscripts();
     resetAI();
-    startCall('session-' + Date.now(), {
-      name: '김민수',
-      phone: '010-1234-5678',
-      customerId: 'SKT-001',
-    });
 
-    // Mock 모드일 때만 자동 시작
-    if (sttMode === 'mock') {
+    // 데모 모드일 때는 시나리오의 고객 정보 사용
+    if (sttMode === 'mock' && currentScenario) {
+      const { customerInfo } = currentScenario;
+      startCall('session-' + Date.now(), {
+        name: customerInfo.name,
+        phone: customerInfo.phone,
+        customerId: customerInfo.customerId,
+        plan: customerInfo.plan,
+        planPrice: customerInfo.planPrice,
+        contractType: customerInfo.contractType,
+        services: customerInfo.services,
+      });
       startConversation();
+    } else {
+      // AI 모드일 때는 기본 고객 정보
+      startCall('session-' + Date.now(), {
+        name: '김민수',
+        phone: '010-1234-5678',
+        customerId: 'SKT-001',
+      });
     }
   };
 

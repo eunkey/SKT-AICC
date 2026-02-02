@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { User, Phone, Clock, Timer } from 'lucide-react';
+import { User, Phone, Clock, Timer, CreditCard, FileText, Gift } from 'lucide-react';
 import { useCallStore } from '@/stores';
 
 function maskPhoneNumber(phone: string): string {
@@ -119,6 +119,52 @@ export function CustomerInfoCard() {
             </div>
           </div>
         </div>
+
+        {/* 요금제 정보 */}
+        {customerInfo.plan && (
+          <div className="pt-2 border-t space-y-2">
+            <div className="flex items-center gap-2">
+              <CreditCard className="w-4 h-4 text-muted-foreground" />
+              <div className="flex-1">
+                <p className="text-xs text-muted-foreground">요금제</p>
+                <p className="text-sm font-medium">
+                  {customerInfo.plan}
+                  {customerInfo.planPrice && (
+                    <span className="text-muted-foreground ml-1">
+                      ({customerInfo.planPrice})
+                    </span>
+                  )}
+                </p>
+              </div>
+            </div>
+
+            {customerInfo.contractType && (
+              <div className="flex items-center gap-2">
+                <FileText className="w-4 h-4 text-muted-foreground" />
+                <div>
+                  <p className="text-xs text-muted-foreground">약정</p>
+                  <p className="text-sm font-medium">{customerInfo.contractType}</p>
+                </div>
+              </div>
+            )}
+
+            {customerInfo.services && customerInfo.services.length > 0 && (
+              <div className="flex items-start gap-2">
+                <Gift className="w-4 h-4 text-muted-foreground mt-0.5" />
+                <div>
+                  <p className="text-xs text-muted-foreground">이용 서비스</p>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {customerInfo.services.map((service, idx) => (
+                      <Badge key={idx} variant="secondary" className="text-xs">
+                        {service}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

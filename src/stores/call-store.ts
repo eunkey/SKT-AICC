@@ -2,10 +2,14 @@ import { create } from 'zustand';
 
 export type CallStatus = 'idle' | 'connecting' | 'active' | 'hold' | 'wrap-up';
 
-interface CustomerInfo {
+export interface CustomerInfo {
   name: string;
   phone: string;
   customerId?: string;
+  plan?: string;
+  planPrice?: string;
+  contractType?: string;
+  services?: string[];
 }
 
 interface CallState {
