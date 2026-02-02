@@ -2,7 +2,9 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { User, Phone, MapPin, Cake, CreditCard } from 'lucide-react';
+import { User, Phone, MapPin, Cake, CreditCard, CheckCircle2 } from 'lucide-react';
+import { useCallStore } from '@/stores';
+import { format } from 'date-fns';
 
 interface CustomerProfileProps {
   name: string;
@@ -21,6 +23,9 @@ export function CustomerProfile({
   location,
   currentPlan,
 }: CustomerProfileProps) {
+  const customerInfo = useCallStore((state) => state.customerInfo);
+  const verifiedAddress = customerInfo?.address;
+
   return (
     <Card>
       <CardHeader className="pb-3 border-b">
@@ -83,6 +88,35 @@ export function CustomerProfile({
             </div>
           </div>
         </div>
+
+        {/* 검증된 주소 섹션 */}
+        {verifiedAddress && (
+          <div className="mt-4 pt-4 border-t">
+            <div className="flex items-start gap-2">
+              <MapPin className="w-4 h-4 text-green-600 mt-0.5" />
+              <div className="flex-1">
+                <div className="flex items-center gap-1 mb-1">
+                  <p className="text-xs font-medium text-green-600 flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3" />
+                    검증된 주소
+                  </p>
+                  <span className="text-[10px] text-muted-foreground">
+                    {format(verifiedAddress.verifiedAt, 'MM/dd HH:mm')}
+                  </span>
+                </div>
+                <p className="text-sm font-medium">{verifiedAddress.roadAddr}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {verifiedAddress.jibunAddr} [{verifiedAddress.zipNo}]
+                </p>
+                {verifiedAddress.bdNm && (
+                  <p className="text-xs text-muted-foreground italic mt-0.5">
+                    {verifiedAddress.bdNm}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

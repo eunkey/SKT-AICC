@@ -7,3 +7,4 @@ export { useAIAnalysisStore } from './ai-analysis-store';
 export type { AIAnalysisResult } from './ai-analysis-store';
 export { useUIStore } from './ui-store';
 export type { SelectedDocument } from './ui-store';
+export { useAddressStore } from './address-store';

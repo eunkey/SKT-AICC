@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import type { SavedAddressInfo } from '@/types/address';
 
 export type CallStatus = 'idle' | 'connecting' | 'active' | 'hold' | 'wrap-up';
 
@@ -10,6 +11,7 @@ export interface CustomerInfo {
   planPrice?: string;
   contractType?: string;
   services?: string[];
+  address?: SavedAddressInfo;
 }
 
 interface CallState {
@@ -27,6 +29,7 @@ interface CallState {
   startWrapUp: () => void;
   updateDuration: (duration: number) => void;
   setCallStatus: (status: CallStatus) => void;
+  updateCustomerAddress: (address: SavedAddressInfo) => void;
   reset: () => void;
 }
 
@@ -65,6 +68,13 @@ export const useCallStore = create<CallState>((set) => ({
   updateDuration: (duration) => set({ callDuration: duration }),
 
   setCallStatus: (status) => set({ callStatus: status }),
+
+  updateCustomerAddress: (address) =>
+    set((state) => ({
+      customerInfo: state.customerInfo
+        ? { ...state.customerInfo, address }
+        : null,
+    })),
 
   reset: () => set(initialState),
 }));
