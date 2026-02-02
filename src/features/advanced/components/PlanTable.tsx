@@ -17,7 +17,7 @@ import { ExtendedPlan } from '../types';
 interface Plan {
   id: string;
   name: string;
-  type: '5G' | 'LTE';
+  type: '5GX' | '0청년' | '베이직' | '시니어' | '청소년' | '어린이';
   data: string;
   voice: string;
   message: string;
@@ -26,158 +26,251 @@ interface Plan {
 }
 
 const PLANS: Plan[] = [
-  // 5G 요금제
+  // ── 5GX 플랜 ──
   {
-    id: '5g-premium-plus',
-    name: '5G 프리미엄 플러스',
-    type: '5G',
-    data: '무제한',
+    id: '5gx-platinum',
+    name: '5GX 플래티넘',
+    type: '5GX',
+    data: '무제한 (테더링 120GB)',
     voice: '무제한',
     message: '무제한',
-    price: '105,000원',
-    features: ['5G 최고속도', '테더링 무제한', 'OTT 4종 무료'],
+    price: '125,000원',
+    features: ['최고급 콘텐츠', '멤버십 혜택', '테더링 120GB'],
   },
   {
-    id: '5g-premium',
-    name: '5G 프리미엄',
-    type: '5G',
-    data: '무제한',
+    id: '5gx-premium',
+    name: '5GX 프리미엄',
+    type: '5GX',
+    data: '무제한 (100GB)',
+    voice: '무제한',
+    message: '무제한',
+    price: '109,000원',
+    features: ['넷플릭스/콘텐츠 옵션', '데이터 무제한'],
+  },
+  {
+    id: '5gx-prime-plus',
+    name: '5GX 프라임플러스',
+    type: '5GX',
+    data: '무제한 (80GB)',
+    voice: '무제한',
+    message: '무제한',
+    price: '99,000원',
+    features: ['콘텐츠 선택형', '데이터 무제한'],
+  },
+  {
+    id: '5gx-prime',
+    name: '5GX 프라임',
+    type: '5GX',
+    data: '무제한 (60GB)',
     voice: '무제한',
     message: '무제한',
     price: '89,000원',
-    features: ['5G 최고 속도', '데이터 무제한', '영상/음악 무제한'],
+    features: ['기본 5G 혜택', '데이터 무제한'],
+  },
+  // ── 0 청년 (만 34세 이하) ──
+  {
+    id: 'young-109',
+    name: '0 청년 109',
+    type: '0청년',
+    data: '120GB',
+    voice: '무제한',
+    message: '무제한',
+    price: '109,000원',
+    features: ['만 34세 이하', '청년 전용 콘텐츠 혜택'],
   },
   {
-    id: '5g-standard-plus',
-    name: '5G 스탠다드 플러스',
-    type: '5G',
-    data: '150GB',
+    id: 'young-89',
+    name: '0 청년 89',
+    type: '0청년',
+    data: '80GB',
+    voice: '무제한',
+    message: '무제한',
+    price: '89,000원',
+    features: ['만 34세 이하', '데이터 중심'],
+  },
+  {
+    id: 'young-79',
+    name: '0 청년 79',
+    type: '0청년',
+    data: '300GB + 5Mbps',
     voice: '무제한',
     message: '무제한',
     price: '79,000원',
-    features: ['5G 고속', '데이터 150GB', 'FLO/wavve 무료'],
+    features: ['만 34세 이하', '데이터 중심', '소진 후 5Mbps'],
   },
   {
-    id: '5g-standard',
-    name: '5G 스탠다드',
-    type: '5G',
-    data: '100GB',
+    id: 'young-69',
+    name: '0 청년 69',
+    type: '0청년',
+    data: '160GB + 5Mbps',
     voice: '무제한',
     message: '무제한',
     price: '69,000원',
-    features: ['5G 고속', '데이터 100GB', '영상/음악 제공'],
+    features: ['만 34세 이하', '소진 후 5Mbps'],
   },
   {
-    id: '5g-slim-plus',
-    name: '5G 슬림 플러스',
-    type: '5G',
-    data: '36GB',
+    id: 'young-59',
+    name: '0 청년 59',
+    type: '0청년',
+    data: '36GB + 1Mbps',
     voice: '무제한',
     message: '무제한',
     price: '59,000원',
-    features: ['5G 기본', '데이터 36GB', 'T map 무료'],
+    features: ['만 34세 이하', '라이트 사용자'],
   },
   {
-    id: '5g-slim',
-    name: '5G 슬림',
-    type: '5G',
-    data: '12GB',
+    id: 'young-49',
+    name: '0 청년 49',
+    type: '0청년',
+    data: '15GB',
     voice: '무제한',
     message: '무제한',
     price: '49,000원',
-    features: ['5G 기본', '데이터 12GB'],
+    features: ['만 34세 이하', '기본형'],
   },
   {
-    id: '5g-light',
-    name: '5G 라이트',
-    type: '5G',
-    data: '6GB',
-    voice: '무제한',
-    message: '무제한',
-    price: '39,000원',
-    features: ['5G 입문', '데이터 6GB'],
-  },
-  // LTE 요금제
-  {
-    id: 'lte-premium',
-    name: 'LTE 프리미엄',
-    type: 'LTE',
-    data: '무제한',
-    voice: '무제한',
-    message: '무제한',
-    price: '69,000원',
-    features: ['LTE 최고 속도', '데이터 무제한'],
-  },
-  {
-    id: 'lte-standard',
-    name: 'LTE 스탠다드',
-    type: 'LTE',
-    data: '50GB',
-    voice: '무제한',
-    message: '무제한',
-    price: '49,000원',
-    features: ['LTE 고속', '데이터 50GB'],
-  },
-  {
-    id: 'lte-basic',
-    name: 'LTE 베이직',
-    type: 'LTE',
+    id: 'young-43',
+    name: '0 청년 43',
+    type: '0청년',
     data: '8GB',
     voice: '무제한',
     message: '무제한',
-    price: '35,000원',
-    features: ['LTE 기본', '데이터 8GB'],
+    price: '43,000원',
+    features: ['만 34세 이하'],
   },
   {
-    id: 'lte-simple',
-    name: 'LTE 심플',
-    type: 'LTE',
-    data: '3GB',
+    id: 'young-37',
+    name: '0 청년 37',
+    type: '0청년',
+    data: '6GB',
     voice: '무제한',
     message: '무제한',
-    price: '29,000원',
-    features: ['LTE 경제형', '데이터 3GB'],
+    price: '37,000원',
+    features: ['만 34세 이하'],
   },
+  // ── 베이직 / 컴팩트 ──
   {
-    id: 'lte-tiny',
-    name: 'LTE 타이니',
-    type: 'LTE',
-    data: '1.5GB',
-    voice: '100분',
-    message: '100건',
-    price: '22,000원',
-    features: ['LTE 알뜰', '음성 100분'],
-  },
-  // 시니어/청소년 요금제
-  {
-    id: 'senior-safe',
-    name: '시니어 안심',
-    type: 'LTE',
-    data: '2GB',
+    id: 'basic-plus-75',
+    name: '베이직플러스 75GB업',
+    type: '베이직',
+    data: '99GB + 1Mbps',
     voice: '무제한',
     message: '무제한',
-    price: '33,000원',
-    features: ['65세 이상', '안심케어 서비스', '큰글씨 UI'],
+    price: '68,000원',
+    features: ['데이터 확장', '소진 후 1Mbps'],
   },
   {
-    id: 'youth-dream',
-    name: '청소년 드림',
-    type: '5G',
-    data: '16GB',
+    id: 'basic-plus',
+    name: '베이직플러스',
+    type: '베이직',
+    data: '24GB + 1Mbps',
+    voice: '무제한',
+    message: '무제한',
+    price: '59,000원',
+    features: ['기본형', '소진 후 1Mbps'],
+  },
+  {
+    id: 'slim',
+    name: '슬림',
+    type: '베이직',
+    data: '15GB + 1Mbps',
+    voice: '무제한',
+    message: '무제한',
+    price: '55,000원',
+    features: ['소진 후 1Mbps'],
+  },
+  {
+    id: 'basic',
+    name: '베이직',
+    type: '베이직',
+    data: '11GB',
+    voice: '무제한',
+    message: '무제한',
+    price: '49,000원',
+    features: ['부담 낮은 기본형'],
+  },
+  {
+    id: 'compact-plus',
+    name: '컴팩트플러스',
+    type: '베이직',
+    data: '8GB + 400Kbps',
+    voice: '무제한',
+    message: '무제한',
+    price: '45,000원',
+    features: ['저용량형', '소진 후 400Kbps'],
+  },
+  {
+    id: 'compact',
+    name: '컴팩트',
+    type: '베이직',
+    data: '6GB + 400Kbps',
+    voice: '무제한',
+    message: '무제한',
+    price: '39,000원',
+    features: ['저용량형', '소진 후 400Kbps'],
+  },
+  // ── 시니어 (65세 이상) ──
+  {
+    id: 'senior-a',
+    name: '시니어 A',
+    type: '시니어',
+    data: '10GB',
+    voice: '무제한',
+    message: '무제한',
+    price: '45,000원',
+    features: ['65세 이상', '안심케어'],
+  },
+  {
+    id: 'senior-b',
+    name: '시니어 B',
+    type: '시니어',
+    data: '9GB',
     voice: '무제한',
     message: '무제한',
     price: '44,000원',
-    features: ['만 19세 이하', '교육앱 무료', '유해차단'],
+    features: ['65세 이상'],
   },
   {
-    id: 'kids-phone',
-    name: '키즈폰 요금제',
-    type: 'LTE',
-    data: '1GB',
+    id: 'senior-c',
+    name: '시니어 C',
+    type: '시니어',
+    data: '8GB',
     voice: '무제한',
     message: '무제한',
-    price: '19,800원',
-    features: ['만 12세 이하', '위치확인', '유해차단'],
+    price: '42,000원',
+    features: ['65세 이상', '경제형'],
+  },
+  // ── 청소년 ──
+  {
+    id: 'teen-5g',
+    name: '0틴 5G',
+    type: '청소년',
+    data: '9GB',
+    voice: '무제한',
+    message: '무제한',
+    price: '45,000원',
+    features: ['청소년 전용', '유해차단'],
+  },
+  // ── 어린이 (ZEM) ──
+  {
+    id: 'zem-best',
+    name: '5G ZEM 플랜 베스트',
+    type: '어린이',
+    data: '3GB',
+    voice: '무제한',
+    message: '무제한',
+    price: '26,000원',
+    features: ['어린이 전용', '위치확인'],
+  },
+  {
+    id: 'zem-perfect',
+    name: '5G ZEM 플랜 퍼펙트',
+    type: '어린이',
+    data: '6GB',
+    voice: '무제한',
+    message: '무제한',
+    price: '36,000원',
+    features: ['어린이 전용', '위치확인', '학습앱'],
   },
 ];
 
@@ -218,13 +311,13 @@ export function PlanTable({ currentPlanId, onSelect, extendedPlans, onAnalyze }:
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>요금제명</TableHead>
-            <TableHead>유형</TableHead>
-            <TableHead>데이터</TableHead>
-            <TableHead>음성/문자</TableHead>
-            <TableHead>월 요금</TableHead>
-            <TableHead>특징</TableHead>
-            <TableHead className="text-right">선택</TableHead>
+            <TableHead className="whitespace-nowrap">요금제명</TableHead>
+            <TableHead className="whitespace-nowrap">유형</TableHead>
+            <TableHead className="whitespace-nowrap">데이터</TableHead>
+            <TableHead className="whitespace-nowrap">음성/문자</TableHead>
+            <TableHead className="whitespace-nowrap">월 요금</TableHead>
+            <TableHead className="whitespace-nowrap">특징</TableHead>
+            <TableHead className="text-right whitespace-nowrap">선택</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -235,19 +328,19 @@ export function PlanTable({ currentPlanId, onSelect, extendedPlans, onAnalyze }:
                 key={plan.id}
                 className={isSelected ? 'bg-muted/50' : ''}
               >
-                <TableCell className="font-medium">{plan.name}</TableCell>
+                <TableCell className="font-medium text-xs whitespace-nowrap">{plan.name}</TableCell>
                 <TableCell>
-                  <Badge variant={plan.type === '5G' ? 'default' : 'secondary'}>
+                  <Badge variant={plan.type === '5GX' ? 'default' : 'secondary'} className="text-[10px] whitespace-nowrap">
                     {plan.type}
                   </Badge>
                 </TableCell>
-                <TableCell>{plan.data}</TableCell>
-                <TableCell>
+                <TableCell className="text-xs whitespace-nowrap">{plan.data}</TableCell>
+                <TableCell className="text-xs whitespace-nowrap">
                   {plan.voice} / {plan.message}
                 </TableCell>
-                <TableCell className="font-semibold">{plan.price}</TableCell>
+                <TableCell className="font-semibold text-xs whitespace-nowrap">{plan.price}</TableCell>
                 <TableCell>
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-[11px] text-muted-foreground whitespace-nowrap">
                     {plan.features.join(', ')}
                   </div>
                 </TableCell>
