@@ -105,12 +105,22 @@ export interface CancellationAnalysis {
   recommendation: Recommendation;
 }
 
+// 데모 고객 정보 타입
+export interface DemoCustomerInfo {
+  name: string;
+  phone: string;
+  gender: '남' | '여';
+  age: number;
+  location: string;
+}
+
 // 데모 시나리오 타입
 export interface DemoScenario {
   id: string;
   name: string;
   description: string;
   customerName: string;
+  customerInfo: DemoCustomerInfo;
   plans: ExtendedPlan[];
   addons: ExtendedAddonService[];
   discounts: ExtendedDiscount[];

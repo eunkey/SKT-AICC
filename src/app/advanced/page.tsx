@@ -264,11 +264,11 @@ export default function AdvancedPage() {
                       {/* 프로필 탭 */}
                       <TabsContent value="profile" className="mt-0 p-4">
                         <CustomerProfile
-                          name={selectedScenario?.customerName || '김민수'}
-                          phone="010-1234-5678"
-                          gender="남"
-                          age={34}
-                          location="서울특별시 강남구"
+                          name={selectedScenario?.customerInfo?.name || '김민수'}
+                          phone={selectedScenario?.customerInfo?.phone || '010-1234-5678'}
+                          gender={selectedScenario?.customerInfo?.gender || '남'}
+                          age={selectedScenario?.customerInfo?.age || 34}
+                          location={selectedScenario?.customerInfo?.location || '서울특별시 강남구'}
                           currentPlan={
                             selectedScenario?.plans.find(
                               (p) => p.id === selectedScenario.selectedPlanId
@@ -281,11 +281,11 @@ export default function AdvancedPage() {
                       <TabsContent value="plans" className="mt-0 p-4 space-y-4">
                         <div className="mb-4">
                           <CustomerProfile
-                            name={selectedScenario?.customerName || '김민수'}
-                            phone="010-1234-5678"
-                            gender="남"
-                            age={34}
-                            location="서울특별시 강남구"
+                            name={selectedScenario?.customerInfo?.name || '김민수'}
+                            phone={selectedScenario?.customerInfo?.phone || '010-1234-5678'}
+                            gender={selectedScenario?.customerInfo?.gender || '남'}
+                            age={selectedScenario?.customerInfo?.age || 34}
+                            location={selectedScenario?.customerInfo?.location || '서울특별시 강남구'}
                             currentPlan={
                               selectedScenario?.plans.find(
                                 (p) => p.id === selectedScenario.selectedPlanId
