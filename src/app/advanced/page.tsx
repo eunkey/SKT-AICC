@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useCallStore, useUIStore, useTranscriptStore, useAIAnalysisStore } from '@/stores';
-import { Phone, PhoneOff, Pause, Play, CreditCard, Plane, Gift, Tag, User, FlaskConical } from 'lucide-react';
+import { Phone, PhoneOff, Pause, Play, CreditCard, Plane, Gift, Tag, User, FlaskConical, Calculator } from 'lucide-react';
 import {
   CustomerProfile,
   PlanTable,
@@ -22,6 +22,7 @@ import {
   AddonServiceTable,
   DiscountTable,
   CancellationAnalysisModal,
+  PlanCalculator,
 } from '@/features/advanced/components';
 import { WrapUpModal } from '@/features/wrap-up/components';
 import { DEMO_SCENARIOS, getScenarioById } from '@/features/advanced/data/demo-scenarios';
@@ -257,6 +258,10 @@ export default function AdvancedPage() {
                           <Tag className="w-3.5 h-3.5" />
                           할인
                         </TabsTrigger>
+                        <TabsTrigger value="calculator" className="text-xs gap-1.5">
+                          <Calculator className="w-3.5 h-3.5" />
+                          요금 시뮬레이터
+                        </TabsTrigger>
                       </TabsList>
                     </div>
 
@@ -338,6 +343,11 @@ export default function AdvancedPage() {
                           extendedDiscounts={selectedScenario?.discounts}
                           onAnalyze={handleAnalyzeDiscount}
                         />
+                      </TabsContent>
+
+                      {/* 요금 시뮬레이터 탭 */}
+                      <TabsContent value="calculator" className="mt-0 p-4">
+                        <PlanCalculator />
                       </TabsContent>
                     </div>
                   </Tabs>
