@@ -2,16 +2,18 @@ import type { AddressResult } from '@/types/address';
 
 /**
  * 주소 패턴 감지 정규식
+ * - greedy 매칭으로 최대한 긴 주소 추출
+ * - 번지/호수까지 포함
  */
 const ADDRESS_PATTERNS = [
-  // 시/도명 포함 패턴
-  /(?:서울|부산|대구|인천|광주|대전|울산|세종|경기|강원|충북|충남|전북|전남|경북|경남|제주)(?:특별시|광역시|특별자치시|도|특별자치도)?\s*[\w\s가-힣]*?(?:시|군|구|읍|면|동|로|길)/,
+  // 시/도명 포함 전체 주소 패턴 (번지까지)
+  /(?:서울|부산|대구|인천|광주|대전|울산|세종|경기|강원|충북|충남|전북|전남|경북|경남|제주)(?:특별시|광역시|특별자치시|도|특별자치도)?[\s]*[가-힣]+(?:시|군|구)[\s]*[가-힣]+(?:읍|면|동|구|로|길)[\s]*[가-힣0-9\-\s]*(?:\d+(?:-\d+)?)?/,
 
-  // 구/군/시 포함 패턴
-  /[\w가-힣]+(?:시|군|구)\s*[\w\s가-힣]*?(?:읍|면|동|로|길)/,
+  // 시/군/구로 시작하는 주소 (번지까지)
+  /[가-힣]+(?:시|군)[\s]+[가-힣]+(?:구|읍|면|동)[\s]*[가-힣0-9\-\s]*(?:로|길|동)?[\s]*\d*(?:-\d+)?/,
 
-  // 도로명 패턴 (도로명 + 숫자)
-  /[\w가-힣]+(?:로|길)\s*\d+/,
+  // 도로명 주소 (도로명 + 번지)
+  /[가-힣]+(?:로|길)[\s]*\d+(?:-\d+)?/,
 ];
 
 /**
@@ -37,12 +39,23 @@ export function detectAddressPattern(text: string): string | null {
     return null;
   }
 
+  let bestMatch: string | null = null;
+  let maxLength = 0;
+
+  // 모든 패턴을 시도하고 가장 긴 매칭 선택
   for (const pattern of ADDRESS_PATTERNS) {
     const match = text.match(pattern);
-    if (match) {
-      console.log('[Address Detection] Found address pattern:', match[0]);
-      return match[0];
+    if (match && match[0].length > maxLength) {
+      maxLength = match[0].length;
+      bestMatch = match[0];
     }
+  }
+
+  if (bestMatch) {
+    // 공백 정리 및 트림
+    const cleaned = bestMatch.replace(/\s+/g, ' ').trim();
+    console.log('[Address Detection] Found address pattern:', cleaned, '(length:', cleaned.length, ')');
+    return cleaned;
   }
 
   return null;
