@@ -22,6 +22,7 @@ interface Discount {
 }
 
 const DISCOUNTS: Discount[] = [
+  // 약정 할인
   {
     id: 'discount-contract-24',
     name: '24개월 약정',
@@ -39,6 +40,15 @@ const DISCOUNTS: Discount[] = [
     discountAmount: '최대 10,680원/월',
   },
   {
+    id: 'discount-public-24',
+    name: '공시지원금 24개월',
+    type: '약정 할인',
+    condition: '단말기 구매 + 24개월 약정',
+    benefit: '단말기 할인',
+    discountAmount: '최대 500,000원',
+  },
+  // 가족 결합 할인
+  {
     id: 'discount-family-2',
     name: '가족 결합 2인',
     type: '결합 할인',
@@ -55,10 +65,19 @@ const DISCOUNTS: Discount[] = [
     discountAmount: '8,800원/월',
   },
   {
+    id: 'discount-family-4',
+    name: '가족 결합 4인 이상',
+    type: '결합 할인',
+    condition: '가족 4인 이상',
+    benefit: '1인당 11,000원 할인',
+    discountAmount: '11,000원/월',
+  },
+  // 인터넷/TV 결합 할인
+  {
     id: 'discount-internet',
     name: '인터넷 결합',
     type: '결합 할인',
-    condition: 'T 인터넷 결합',
+    condition: 'SK브로드밴드 인터넷 결합',
     benefit: '월 11,000원 할인',
     discountAmount: '11,000원/월',
   },
@@ -70,6 +89,15 @@ const DISCOUNTS: Discount[] = [
     benefit: '월 7,700원 할인',
     discountAmount: '7,700원/월',
   },
+  {
+    id: 'discount-triple',
+    name: '트리플 결합',
+    type: '결합 할인',
+    condition: '인터넷 + TV + 모바일',
+    benefit: '최대 25% 추가 할인',
+    discountAmount: '최대 25,000원/월',
+  },
+  // 납부 할인
   {
     id: 'discount-auto-pay',
     name: '자동이체 할인',
@@ -85,6 +113,55 @@ const DISCOUNTS: Discount[] = [
     condition: '전자 청구서 신청',
     benefit: '월 550원 할인',
     discountAmount: '550원/월',
+  },
+  {
+    id: 'discount-card',
+    name: '제휴카드 할인',
+    type: '납부 할인',
+    condition: 'T멤버십 제휴카드 결제',
+    benefit: '월 최대 15% 할인',
+    discountAmount: '최대 13,350원/월',
+  },
+  // 특별 할인
+  {
+    id: 'discount-long-term',
+    name: '장기고객 할인',
+    type: '특별 할인',
+    condition: '가입 5년 이상',
+    benefit: '월 요금 5% 할인',
+    discountAmount: '최대 4,450원/월',
+  },
+  {
+    id: 'discount-senior',
+    name: '시니어 할인',
+    type: '특별 할인',
+    condition: '만 65세 이상',
+    benefit: '월 요금 30% 할인',
+    discountAmount: '최대 26,700원/월',
+  },
+  {
+    id: 'discount-disabled',
+    name: '장애인 할인',
+    type: '특별 할인',
+    condition: '장애인 복지카드 소지자',
+    benefit: '월 요금 35% 할인',
+    discountAmount: '최대 31,150원/월',
+  },
+  {
+    id: 'discount-national-merit',
+    name: '국가유공자 할인',
+    type: '특별 할인',
+    condition: '국가유공자 본인 및 가족',
+    benefit: '월 요금 35% 할인',
+    discountAmount: '최대 31,150원/월',
+  },
+  {
+    id: 'discount-military',
+    name: '군인 할인',
+    type: '특별 할인',
+    condition: '현역 군인',
+    benefit: '월 요금 25% 할인',
+    discountAmount: '최대 22,250원/월',
   },
 ];
 

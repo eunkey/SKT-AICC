@@ -24,6 +24,7 @@ interface RoamingPlan {
 }
 
 const ROAMING_PLANS: RoamingPlan[] = [
+  // 아시아 로밍
   {
     id: 'roaming-asia-unlimited',
     name: '아시아 무제한 로밍',
@@ -45,6 +46,27 @@ const ROAMING_PLANS: RoamingPlan[] = [
     autoConnect: true,
   },
   {
+    id: 'roaming-japan-special',
+    name: '일본 전용 로밍',
+    region: '아시아',
+    countries: '일본',
+    data: '무제한',
+    validity: '5일',
+    price: '39,000원',
+    autoConnect: true,
+  },
+  {
+    id: 'roaming-china-special',
+    name: '중국 전용 로밍',
+    region: '아시아',
+    countries: '중국, 홍콩, 마카오',
+    data: '무제한',
+    validity: '5일',
+    price: '35,000원',
+    autoConnect: true,
+  },
+  // 유럽 로밍
+  {
     id: 'roaming-europe-unlimited',
     name: '유럽 무제한 로밍',
     region: '유럽',
@@ -55,8 +77,29 @@ const ROAMING_PLANS: RoamingPlan[] = [
     autoConnect: true,
   },
   {
+    id: 'roaming-europe-weekly',
+    name: '유럽 7일 패키지',
+    region: '유럽',
+    countries: '영국, 프랑스, 독일 등 30개국',
+    data: '5GB',
+    validity: '7일',
+    price: '55,000원',
+    autoConnect: true,
+  },
+  // 미주 로밍
+  {
+    id: 'roaming-americas-unlimited',
+    name: '미주 무제한 로밍',
+    region: '미주',
+    countries: '미국, 캐나다',
+    data: '무제한',
+    validity: '24시간',
+    price: '14,900원/일',
+    autoConnect: true,
+  },
+  {
     id: 'roaming-americas',
-    name: '미주 로밍',
+    name: '미주 기본 로밍',
     region: '미주',
     countries: '미국, 캐나다, 멕시코',
     data: '1GB',
@@ -65,6 +108,17 @@ const ROAMING_PLANS: RoamingPlan[] = [
     autoConnect: true,
   },
   {
+    id: 'roaming-usa-weekly',
+    name: '미국 7일 패키지',
+    region: '미주',
+    countries: '미국',
+    data: '5GB',
+    validity: '7일',
+    price: '65,000원',
+    autoConnect: true,
+  },
+  // 글로벌/기타
+  {
     id: 'roaming-global',
     name: '글로벌 무제한 로밍',
     region: '전세계',
@@ -72,6 +126,16 @@ const ROAMING_PLANS: RoamingPlan[] = [
     data: '무제한',
     validity: '7일',
     price: '89,000원/주',
+    autoConnect: true,
+  },
+  {
+    id: 'roaming-global-monthly',
+    name: '글로벌 월정액 로밍',
+    region: '전세계',
+    countries: '전세계 120개국',
+    data: '무제한',
+    validity: '30일',
+    price: '199,000원/월',
     autoConnect: true,
   },
   {

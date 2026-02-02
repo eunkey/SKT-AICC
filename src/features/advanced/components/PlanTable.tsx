@@ -24,6 +24,17 @@ interface Plan {
 }
 
 const PLANS: Plan[] = [
+  // 5G 요금제
+  {
+    id: '5g-premium-plus',
+    name: '5G 프리미엄 플러스',
+    type: '5G',
+    data: '무제한',
+    voice: '무제한',
+    message: '무제한',
+    price: '105,000원',
+    features: ['5G 최고속도', '테더링 무제한', 'OTT 4종 무료'],
+  },
   {
     id: '5g-premium',
     name: '5G 프리미엄',
@@ -33,6 +44,16 @@ const PLANS: Plan[] = [
     message: '무제한',
     price: '89,000원',
     features: ['5G 최고 속도', '데이터 무제한', '영상/음악 무제한'],
+  },
+  {
+    id: '5g-standard-plus',
+    name: '5G 스탠다드 플러스',
+    type: '5G',
+    data: '150GB',
+    voice: '무제한',
+    message: '무제한',
+    price: '79,000원',
+    features: ['5G 고속', '데이터 150GB', 'FLO/wavve 무료'],
   },
   {
     id: '5g-standard',
@@ -45,6 +66,16 @@ const PLANS: Plan[] = [
     features: ['5G 고속', '데이터 100GB', '영상/음악 제공'],
   },
   {
+    id: '5g-slim-plus',
+    name: '5G 슬림 플러스',
+    type: '5G',
+    data: '36GB',
+    voice: '무제한',
+    message: '무제한',
+    price: '59,000원',
+    features: ['5G 기본', '데이터 36GB', 'T map 무료'],
+  },
+  {
     id: '5g-slim',
     name: '5G 슬림',
     type: '5G',
@@ -54,6 +85,17 @@ const PLANS: Plan[] = [
     price: '49,000원',
     features: ['5G 기본', '데이터 12GB'],
   },
+  {
+    id: '5g-light',
+    name: '5G 라이트',
+    type: '5G',
+    data: '6GB',
+    voice: '무제한',
+    message: '무제한',
+    price: '39,000원',
+    features: ['5G 입문', '데이터 6GB'],
+  },
+  // LTE 요금제
   {
     id: 'lte-premium',
     name: 'LTE 프리미엄',
@@ -83,6 +125,57 @@ const PLANS: Plan[] = [
     message: '무제한',
     price: '35,000원',
     features: ['LTE 기본', '데이터 8GB'],
+  },
+  {
+    id: 'lte-simple',
+    name: 'LTE 심플',
+    type: 'LTE',
+    data: '3GB',
+    voice: '무제한',
+    message: '무제한',
+    price: '29,000원',
+    features: ['LTE 경제형', '데이터 3GB'],
+  },
+  {
+    id: 'lte-tiny',
+    name: 'LTE 타이니',
+    type: 'LTE',
+    data: '1.5GB',
+    voice: '100분',
+    message: '100건',
+    price: '22,000원',
+    features: ['LTE 알뜰', '음성 100분'],
+  },
+  // 시니어/청소년 요금제
+  {
+    id: 'senior-safe',
+    name: '시니어 안심',
+    type: 'LTE',
+    data: '2GB',
+    voice: '무제한',
+    message: '무제한',
+    price: '33,000원',
+    features: ['65세 이상', '안심케어 서비스', '큰글씨 UI'],
+  },
+  {
+    id: 'youth-dream',
+    name: '청소년 드림',
+    type: '5G',
+    data: '16GB',
+    voice: '무제한',
+    message: '무제한',
+    price: '44,000원',
+    features: ['만 19세 이하', '교육앱 무료', '유해차단'],
+  },
+  {
+    id: 'kids-phone',
+    name: '키즈폰 요금제',
+    type: 'LTE',
+    data: '1GB',
+    voice: '무제한',
+    message: '무제한',
+    price: '19,800원',
+    features: ['만 12세 이하', '위치확인', '유해차단'],
   },
 ];
 
