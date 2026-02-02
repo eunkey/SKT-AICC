@@ -19,21 +19,24 @@ export function AITriggerFAB() {
     }
   }, [isLoading, analyzeContext]);
 
+  // 통화 중이 아니면 비활성화
+  const isDisabled = callStatus === 'idle' || isLoading;
+
   // 키보드 단축키: Ctrl+Shift+A
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.shiftKey && e.key === 'A') {
         e.preventDefault();
-        handleClick();
+        // 통화 중일 때만 작동
+        if (!isDisabled) {
+          handleClick();
+        }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleClick]);
-
-  // 통화 중이 아니면 비활성화
-  const isDisabled = callStatus === 'idle' || isLoading;
+  }, [handleClick, isDisabled]);
 
   return (
     <TooltipProvider>
