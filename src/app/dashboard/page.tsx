@@ -9,20 +9,28 @@ import { WrapUpModal } from '@/features/wrap-up/components';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useCallStore, useUIStore, useTranscriptStore, useAIAnalysisStore } from '@/stores';
-import { useMockSTT } from '@/features/transcript/hooks/useMockSTT';
+import { useMockSTT, DEMO_SCENARIOS } from '@/features/transcript/hooks/useMockSTT';
 import { Phone, PhoneOff, Pause, Play, PlayCircle, Bot } from 'lucide-react';
 
 type STTMode = 'mock' | 'real' | 'ai';
 
 export default function DashboardPage() {
   const [sttMode, setSTTMode] = useState<STTMode>('ai');
+  const [selectedScenarioId, setSelectedScenarioId] = useState('plan-change');
 
   const { callStatus, startCall, endCall, holdCall, resumeCall, reset } = useCallStore();
   const { openModal } = useUIStore();
   const { clearTranscripts } = useTranscriptStore();
   const { reset: resetAI } = useAIAnalysisStore();
-  const { isPlaying, startConversation, stopConversation, resetConversation } = useMockSTT();
+  const { isPlaying, currentScenario, startConversation, stopConversation, resetConversation } = useMockSTT(selectedScenarioId);
 
   // 통화 시작
   const handleStartCall = () => {
@@ -79,7 +87,7 @@ export default function DashboardPage() {
   const getModeDescription = () => {
     switch (sttMode) {
       case 'mock':
-        return '데모 모드: 요금제 변경 시나리오 재생';
+        return `데모: ${currentScenario.name}`;
       case 'ai':
         return 'AI 대화 모드: 고객 음성 → AI 상담사 응답';
       default:
@@ -108,6 +116,30 @@ export default function DashboardPage() {
                     </TabsTrigger>
                   </TabsList>
                 </Tabs>
+
+                {/* 데모 모드일 때 시나리오 선택 */}
+                {sttMode === 'mock' && (
+                  <Select
+                    value={selectedScenarioId}
+                    onValueChange={setSelectedScenarioId}
+                  >
+                    <SelectTrigger className="w-[200px] h-9">
+                      <SelectValue placeholder="시나리오 선택" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {DEMO_SCENARIOS.map((scenario) => (
+                        <SelectItem key={scenario.id} value={scenario.id}>
+                          <div className="flex flex-col">
+                            <span className="font-medium">{scenario.name}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {scenario.description}
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
 
                 <Button onClick={handleStartCall} className="gap-2 bg-[#E4002B] hover:bg-[#C4002B]">
                   <Phone className="w-4 h-4" />
