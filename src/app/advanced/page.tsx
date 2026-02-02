@@ -186,18 +186,13 @@ export default function AdvancedPage() {
                 value={selectedScenarioId || ''}
                 onValueChange={(value) => setSelectedScenarioId(value || null)}
               >
-                <SelectTrigger className="w-[280px]">
-                  <SelectValue placeholder="데모 시나리오 선택..." />
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="시나리오 선택" />
                 </SelectTrigger>
                 <SelectContent>
                   {DEMO_SCENARIOS.map((scenario) => (
                     <SelectItem key={scenario.id} value={scenario.id}>
-                      <div className="flex flex-col">
-                        <span>{scenario.name}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {scenario.description}
-                        </span>
-                      </div>
+                      {scenario.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
