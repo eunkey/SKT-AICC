@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { DashboardLayout } from '@/features/dashboard/components';
-import { ConversationStream, STTControls, AIConversationControls } from '@/features/transcript/components';
+import { ConversationStream, RealtimeSTTControlsFixed, AIConversationControls } from '@/features/transcript/components';
 import { AIIntelligencePanel, AITriggerFAB } from '@/features/ai-analysis/components';
 import { DocumentSearchPanel } from '@/features/search';
 import { WrapUpModal } from '@/features/wrap-up/components';
@@ -83,7 +83,7 @@ export default function DashboardPage() {
       case 'mock':
         return '데모 모드: 요금제 변경 시나리오 재생';
       case 'real':
-        return '실시간 모드: 마이크 녹음만';
+        return '실시간 모드: OpenAI Realtime API (스트리밍 전사)';
       case 'ai':
         return 'AI 대화 모드: 고객 음성 → AI 상담사 응답';
     }
@@ -174,9 +174,9 @@ export default function DashboardPage() {
                   </Button>
                 )}
 
-                {/* Real 모드: STT 컨트롤 */}
+                {/* Real 모드: 실시간 STT 컨트롤 (OpenAI Realtime API) */}
                 {sttMode === 'real' && (
-                  <STTControls isCallActive={isCallActive} />
+                  <RealtimeSTTControlsFixed isCallActive={isCallActive} />
                 )}
 
                 {/* AI 대화 모드: AI 대화 컨트롤 */}
