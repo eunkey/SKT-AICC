@@ -12,9 +12,14 @@ const ADDRESS_PATTERNS = [
   // 시/군/구로 시작하는 주소 (번지까지)
   /[가-힣]+(?:시|군)[\s]+[가-힣]+(?:구|읍|면|동)[\s]*[가-힣0-9\-\s]*(?:로|길|동)?[\s]*\d*(?:-\d+)?/,
 
-  // 도로명 주소 (도로명 + 번지)
-  /[가-힣]+(?:로|길)[\s]*\d+(?:-\d+)?/,
+  // 도로명(로/길) + (선택: 숫자+한글+로/길 세그먼트 반복) + 번지
+  /[가-힣0-9]+(?:로|길)(?:\s*[0-9]+[가-힣]*?(?:로|길))*\s*\d+(?:-\d+)?/
 ];
+
+/**
+ * 주소 뒤에 붙는 종결어미/조사 패턴
+ */
+const ADDRESS_SUFFIX_PATTERN = /[\s]*(입니다|이에요|예요|이요|요|이야|야|인데요|인데|이고요|이고|으로|로|에서|에|을|를|은|는|이|가)[\s.,!?]*$/;
 
 /**
  * SQL 예약어 목록
@@ -53,7 +58,11 @@ export function detectAddressPattern(text: string): string | null {
 
   if (bestMatch) {
     // 공백 정리 및 트림
-    const cleaned = bestMatch.replace(/\s+/g, ' ').trim();
+    let cleaned = bestMatch.replace(/\s+/g, ' ').trim();
+
+    // 종결어미/조사 제거 (입니다, 예요, 이에요 등)
+    cleaned = cleaned.replace(ADDRESS_SUFFIX_PATTERN, '').trim();
+
     console.log('[Address Detection] Found address pattern:', cleaned, '(length:', cleaned.length, ')');
     return cleaned;
   }

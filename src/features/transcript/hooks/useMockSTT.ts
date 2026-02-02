@@ -101,6 +101,29 @@ const familyCancelConversation: MockConversationItem[] = [
   { speaker: 'counselor', text: '네, 박철수 고객님. 결정하시면 언제든 연락주세요. 상담 감사합니다.', delay: 66000 },
 ];
 
+// 시나리오 5: 주소 검증 및 청구지 변경
+const addressVerificationConversation: MockConversationItem[] = [
+  { speaker: 'customer', text: '안녕하세요. 지난주에 이사를 했는데요, 청구지 주소를 변경하려고 전화 드렸습니다.', delay: 0 },
+  { speaker: 'counselor', text: '네, SK텔레콤 고객센터입니다. 박서준 고객님, 이사 축하드립니다! 청구지 주소 변경 도와드리겠습니다.', delay: 3000 },
+  { speaker: 'counselor', text: '먼저 현재 등록된 주소 확인해 드릴게요. 서울특별시 마포구 월드컵북로 396, 상암동이 맞으시죠?', delay: 7000 },
+  { speaker: 'customer', text: '네, 맞아요. 거기가 예전 집이에요.', delay: 11000 },
+  { speaker: 'counselor', text: '네, 확인되었습니다. 새로 이사 가신 주소 말씀해 주시겠어요?', delay: 14000 },
+  { speaker: 'customer', text: '새 주소는 서울시 강남구 테헤란로 427 입니다. 건물 이름은 위워크 타워예요.', delay: 17000 },
+  { speaker: 'counselor', text: '고객님, 주소를 검색해 보니 테헤란로 427 주소가 나오네요. 건물명이 위워크 타워라고 하신 주소가 맞으신가요? 도로명은 서울특별시 강남구 테헤란로 427, 지번은 역삼동 823-20, 우편번호는 06159입니다.', delay: 22000 },
+  { speaker: 'customer', text: '네, 맞아요! 그 주소가 정확해요.', delay: 30000 },
+  { speaker: 'counselor', text: '네, 주소가 등록되었습니다! 혹시 동이나 호수, 층수 같은 상세 주소도 있으시면 추가로 입력해 드릴게요.', delay: 33000 },
+  { speaker: 'customer', text: '아, 네. 12층 1205호예요.', delay: 38000 },
+  { speaker: 'counselor', text: '12층 1205호 추가 입력했습니다. 최종 등록 주소는 서울특별시 강남구 테헤란로 427, 위워크 타워 12층 1205호, 우편번호 06159입니다. 이대로 등록해 드릴까요?', delay: 41000 },
+  { speaker: 'customer', text: '네, 완벽해요!', delay: 49000 },
+  { speaker: 'counselor', text: '박서준 고객님, 청구지 주소 변경 완료되었습니다! 다음 청구서부터 새 주소로 발송되고요, 신용카드 자동결제는 기존대로 유지됩니다.', delay: 52000 },
+  { speaker: 'customer', text: '감사합니다! 그런데 새 집이 아파트라서 인터넷도 신청해야 하는데, SK브로드밴드도 쓸 수 있나요?', delay: 58000 },
+  { speaker: 'counselor', text: '좋은 소식이에요! 강남구 테헤란로는 SK브로드밴드 기가 인터넷이 가능한 지역입니다. 고객님 현재 5GX 스탠다드 요금제를 쓰고 계시니까, 결합 할인도 받으실 수 있어요.', delay: 64000 },
+  { speaker: 'customer', text: '오, 그럼 나중에 인터넷 신청할 때 다시 전화 드려도 되나요?', delay: 71000 },
+  { speaker: 'counselor', text: '물론이에요! 114로 전화 주시면 언제든지 도와드리겠습니다. T월드 앱에서도 인터넷 상품 확인하시고 바로 신청 가능하세요.', delay: 75000 },
+  { speaker: 'customer', text: '아니요, 정말 친절하게 안내해 주셔서 감사합니다!', delay: 81000 },
+  { speaker: 'counselor', text: '천만에요. 새 집에서 행복하세요! 추가 문의 있으시면 언제든 114로 연락 주세요. 좋은 하루 되세요!', delay: 84000 },
+];
+
 // 전체 데모 시나리오 목록
 export const DEMO_SCENARIOS: DemoScenarioConfig[] = [
   {
@@ -159,6 +182,19 @@ export const DEMO_SCENARIOS: DemoScenarioConfig[] = [
       services: ['4인 가족 결합', '인터넷 결합', 'TV 결합', '트리플 결합'],
     },
     conversation: familyCancelConversation,
+  },
+  {
+    id: 'address-verification',
+    name: '주소 검증 및 변경',
+    description: '이사 후 청구지 주소 변경 + 도로명주소 자동 검증',
+    customerInfo: {
+      name: '박서준',
+      phone: '010-3333-9999',
+      customerId: 'SKT-005',
+      plan: '5GX 스탠다드',
+      planPrice: '89,000원',
+    },
+    conversation: addressVerificationConversation,
   },
 ];
 

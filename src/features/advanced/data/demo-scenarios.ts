@@ -265,6 +265,48 @@ const scenario3Discounts: ExtendedDiscount[] = [
   },
 ];
 
+// 시나리오 4: 주소 검증 및 변경 (도로명주소 자동 검증)
+const scenario4Plans: ExtendedPlan[] = [
+  {
+    id: '5gx-standard',
+    name: '5GX 스탠다드',
+    type: '5G',
+    data: '150GB',
+    voice: '무제한',
+    message: '무제한',
+    price: '89,000원',
+    monthlyPrice: 89000,
+    features: ['5G 고속', '데이터 150GB', 'T멤버십 플래티넘'],
+    contract: null,
+    penalty: null,
+  },
+];
+
+const scenario4Addons: ExtendedAddonService[] = [
+  {
+    id: 'addon-auto-pay',
+    name: '자동이체 할인',
+    category: '할인',
+    description: '신용카드/은행 자동이체',
+    benefit: '월 1,100원 할인',
+    price: '무료',
+    monthlyPrice: 0,
+    isFree: true,
+  },
+];
+
+const scenario4Discounts: ExtendedDiscount[] = [
+  {
+    id: 'discount-auto-pay',
+    name: '자동이체 할인',
+    type: '납부 할인',
+    condition: '자동이체 등록',
+    benefit: '월 1,100원 할인',
+    discountAmount: '1,100원/월',
+    monthlyDiscount: 1100,
+  },
+];
+
 // 전체 시나리오 목록
 export const DEMO_SCENARIOS: DemoScenario[] = [
   {
@@ -323,6 +365,25 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
     selectedPlanId: '5g-standard-plus',
     selectedAddonIds: ['addon-music', 'addon-family-share'],
     selectedDiscountIds: ['discount-family-4', 'discount-triple', 'discount-internet', 'discount-tv', 'discount-contract-24'],
+  },
+  {
+    id: 'scenario-4',
+    name: '시나리오 4: 주소 검증 및 변경',
+    description: '이사 후 청구지 주소 변경 + 도로명주소 자동 검증 (서울시 강남구 테헤란로)',
+    customerName: '박서준',
+    customerInfo: {
+      name: '박서준',
+      phone: '010-3333-9999',
+      gender: '남',
+      age: 32,
+      location: '서울특별시 마포구',
+    },
+    plans: scenario4Plans,
+    addons: scenario4Addons,
+    discounts: scenario4Discounts,
+    selectedPlanId: '5gx-standard',
+    selectedAddonIds: ['addon-auto-pay'],
+    selectedDiscountIds: ['discount-auto-pay'],
   },
 ];
 
