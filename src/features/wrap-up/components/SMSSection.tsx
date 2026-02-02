@@ -53,12 +53,12 @@ export function SMSSection({
             <Textarea
               value={content}
               onChange={(e) => onContentChange(e.target.value)}
-              rows={5}
-              className="pr-16"
+              rows={10}
+              className="pr-16 text-sm"
               placeholder="SMS 내용을 입력하세요"
             />
             <div className="absolute bottom-2 right-2 text-xs text-muted-foreground">
-              {content.length}/90자
+              {content.length}자 (LMS)
             </div>
           </div>
           <p className="text-xs text-muted-foreground flex items-center gap-1">

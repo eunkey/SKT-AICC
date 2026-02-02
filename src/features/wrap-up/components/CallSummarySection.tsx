@@ -5,6 +5,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Edit2, Save, X } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface CallSummarySectionProps {
   summary: string;
@@ -64,8 +66,8 @@ export function CallSummarySection({
           </div>
         </div>
       ) : (
-        <div className="prose prose-sm max-w-none bg-muted/50 rounded-lg p-4">
-          <div className="whitespace-pre-wrap text-sm">{summary}</div>
+        <div className="prose prose-sm max-w-none bg-muted/50 rounded-lg p-4 dark:prose-invert">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{summary}</ReactMarkdown>
         </div>
       )}
     </div>
