@@ -3,6 +3,7 @@
 import { useCallback } from 'react';
 import { useTranscriptStore, useAIAnalysisStore } from '@/stores';
 import { RelatedDocument } from '@/types/database';
+import { extractDictionaryKeywords, getDictionaryPriority } from '@/lib/skt-dictionary';
 
 interface SearchResult {
   filePath: string;
@@ -22,7 +23,11 @@ interface SearchResponse {
 function extractKeywords(text: string): string[] {
   const keywords: string[] = [];
 
-  // SK텔레콤 관련 키워드 패턴
+  // 딕셔너리 기반 키워드 추출 (별칭 → 정식 상품명)
+  const dictionaryKeywords = extractDictionaryKeywords(text);
+  keywords.push(...dictionaryKeywords);
+
+  // SK텔레콤 관련 키워드 패턴 (딕셔너리에 없는 일반 키워드)
   const patterns = [
     // 요금제 관련
     /요금제|플랜|5G|LTE|무제한|데이터/g,
@@ -73,11 +78,16 @@ function prioritizeKeywords(keywords: string[]): string {
 
   if (keywords.length === 0) return '';
 
-  // 우선순위 기반 정렬
+  // 딕셔너리 기반 우선순위와 기존 우선순위를 결합
   const sorted = [...keywords].sort((a, b) => {
-    const priorityA = priority[a] || 1;
-    const priorityB = priority[b] || 1;
-    return priorityB - priorityA;
+    const dictPriorityA = getDictionaryPriority(a);
+    const dictPriorityB = getDictionaryPriority(b);
+    const staticPriorityA = priority[a] || 1;
+    const staticPriorityB = priority[b] || 1;
+    // 딕셔너리 우선순위가 있으면 그것을 사용, 없으면 기존 우선순위
+    const finalA = dictPriorityA > 0 ? dictPriorityA : staticPriorityA;
+    const finalB = dictPriorityB > 0 ? dictPriorityB : staticPriorityB;
+    return finalB - finalA;
   });
 
   return sorted[0];

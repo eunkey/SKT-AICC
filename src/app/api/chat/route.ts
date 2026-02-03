@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { getPromptDictionary } from '@/lib/skt-dictionary';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -27,7 +28,9 @@ SK텔레콤 상담 분야:
 현재 상담 맥락:
 - SK텔레콤 고객이 통신 관련 문의를 하고 있습니다
 - 친절하고 전문적인 상담을 제공하세요
-- "고객님"이라는 호칭을 사용하세요`;
+- "고객님"이라는 호칭을 사용하세요
+
+${getPromptDictionary()}`;
 
 interface Message {
   role: 'user' | 'assistant' | 'system';
