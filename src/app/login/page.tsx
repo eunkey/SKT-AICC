@@ -58,7 +58,7 @@ export default function LoginPage() {
             <span className="text-2xl font-bold text-[#E4002B]">SK telecom</span>
           </div>
           <CardTitle className="text-2xl">AI 상담 어시스턴트</CardTitle>
-          <CardDescription>고객센터 상담사를 위한 AI 지원 시스템</CardDescription>
+          <CardDescription>고객센터 상담사를 위한 지원 시스템</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">

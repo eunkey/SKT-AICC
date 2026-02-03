@@ -124,17 +124,17 @@ export function getSecurityBadgeInfo(status: SecurityBadgeStatus) {
     complete: {
       icon: '🔒',
       color: 'text-green-600 bg-green-100',
-      text: 'PII 마스킹 완료',
+      text: '개인정보 보호 완료',
     },
     processing: {
       icon: '🔄',
       color: 'text-yellow-600 bg-yellow-100',
-      text: 'PII 처리 중...',
+      text: '개인정보 보호 중...',
     },
     error: {
       icon: '⚠️',
       color: 'text-red-600 bg-red-100',
-      text: 'PII 처리 오류',
+      text: '개인정보 보호 오류',
     },
   };
 
