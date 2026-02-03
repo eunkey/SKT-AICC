@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { getWhisperPrompt, correctTranscription } from '@/lib/skt-dictionary';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -24,11 +25,14 @@ export async function POST(request: NextRequest) {
       model: 'gpt-4o-transcribe',
       language: 'ko',
       response_format: 'json',
-      prompt: '이 대화는 SK텔레콤 고객센터 상담 내용입니다. 고객과 상담사가 대화하고 있습니다. 요금제, 데이터, 로밍, T멤버십, 5G, LTE, 휴대폰, 인터넷, TV 등 통신 관련 용어가 포함될 수 있습니다.',
+      prompt: getWhisperPrompt(),
     });
 
+    // 딕셔너리 기반 후보정 (오인식 상품명 교정)
+    const correctedText = correctTranscription(transcription.text);
+
     return NextResponse.json({
-      text: transcription.text,
+      text: correctedText,
       speaker,
       timestamp: new Date().toISOString(),
     });
