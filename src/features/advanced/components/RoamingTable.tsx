@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
@@ -11,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Search } from 'lucide-react';
 
 interface RoamingPlan {
   id: string;
@@ -182,6 +184,7 @@ interface RoamingTableProps {
 
 export function RoamingTable({ selectedRoaming = [], onSelect }: RoamingTableProps) {
   const [selected, setSelected] = useState<Set<string>>(new Set(selectedRoaming));
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleSelect = (roamingId: string) => {
     const newSelected = new Set(selected);
@@ -194,8 +197,31 @@ export function RoamingTable({ selectedRoaming = [], onSelect }: RoamingTablePro
     onSelect?.(roamingId);
   };
 
+  const filteredPlans = useMemo(() => {
+    if (!searchQuery.trim()) return ROAMING_PLANS;
+    const q = searchQuery.toLowerCase();
+    return ROAMING_PLANS.filter(
+      (p) =>
+        p.name.toLowerCase().includes(q) ||
+        p.category.toLowerCase().includes(q) ||
+        p.price.includes(q) ||
+        p.data.toLowerCase().includes(q) ||
+        p.features.toLowerCase().includes(q)
+    );
+  }, [searchQuery]);
+
   return (
-    <div className="rounded-md border">
+    <div className="space-y-3">
+      <div className="relative">
+        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="로밍 검색 (상품명, 유형, 데이터)..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9 h-9"
+        />
+      </div>
+      <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
@@ -211,7 +237,7 @@ export function RoamingTable({ selectedRoaming = [], onSelect }: RoamingTablePro
           </TableRow>
         </TableHeader>
         <TableBody>
-          {ROAMING_PLANS.map((plan) => {
+          {filteredPlans.map((plan) => {
             const isSelected = selected.has(plan.id);
             return (
               <TableRow
@@ -256,6 +282,7 @@ export function RoamingTable({ selectedRoaming = [], onSelect }: RoamingTablePro
           })}
         </TableBody>
       </Table>
+      </div>
     </div>
   );
 }

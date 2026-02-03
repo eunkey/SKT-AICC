@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
@@ -11,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Calculator } from 'lucide-react';
+import { Calculator, Search } from 'lucide-react';
 import { ExtendedAddonService } from '../types';
 
 interface AddonService {
@@ -235,6 +236,7 @@ export function AddonServiceTable({
   onAnalyze,
 }: AddonServiceTableProps) {
   const [selected, setSelected] = useState<Set<string>>(new Set(selectedServices));
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleSelect = (serviceId: string) => {
     const newSelected = new Set(selected);
@@ -248,7 +250,19 @@ export function AddonServiceTable({
   };
 
   // 확장된 부가서비스 데이터가 있으면 사용
-  const addonsToShow = extendedAddons || ADDON_SERVICES;
+  const baseAddons = extendedAddons || ADDON_SERVICES;
+  const addonsToShow = useMemo(() => {
+    if (!searchQuery.trim()) return baseAddons;
+    const q = searchQuery.toLowerCase();
+    return baseAddons.filter(
+      (a) =>
+        a.name.toLowerCase().includes(q) ||
+        a.category.toLowerCase().includes(q) ||
+        a.description.toLowerCase().includes(q) ||
+        a.benefit.toLowerCase().includes(q) ||
+        a.price.toLowerCase().includes(q)
+    );
+  }, [baseAddons, searchQuery]);
 
   const handleAnalyze = (addonId: string) => {
     if (extendedAddons && onAnalyze) {
@@ -260,7 +274,17 @@ export function AddonServiceTable({
   };
 
   return (
-    <div className="rounded-md border">
+    <div className="space-y-3">
+      <div className="relative">
+        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="부가서비스 검색 (이름, 카테고리, 혜택)..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9 h-9"
+        />
+      </div>
+      <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
@@ -331,6 +355,7 @@ export function AddonServiceTable({
           })}
         </TableBody>
       </Table>
+      </div>
     </div>
   );
 }

@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
@@ -10,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Search } from 'lucide-react';
 
 export interface Device {
   id: string;
@@ -67,8 +69,14 @@ interface DeviceTableProps {
   onSelect?: (deviceId: string) => void;
 }
 
+const DEVICE_ALIASES: Record<string, string> = {
+  '아이폰': 'iphone', '갤럭시': 'galaxy', '폴드': 'fold',
+  '플립': 'flip', '퀀텀': 'quantum', '울트라': 'ultra',
+};
+
 export function DeviceTable({ selectedDevice = [], onSelect }: DeviceTableProps) {
   const [selected, setSelected] = useState<Set<string>>(new Set(selectedDevice));
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleSelect = (deviceId: string) => {
     const newSelected = new Set(selected);
@@ -81,8 +89,31 @@ export function DeviceTable({ selectedDevice = [], onSelect }: DeviceTableProps)
     onSelect?.(deviceId);
   };
 
+  const filteredDevices = useMemo(() => {
+    if (!searchQuery.trim()) return DEVICES;
+    const q = searchQuery.toLowerCase();
+    let mapped = q;
+    for (const [ko, en] of Object.entries(DEVICE_ALIASES)) {
+      mapped = mapped.replaceAll(ko, en);
+    }
+    return DEVICES.filter((d) => {
+      const name = d.name.toLowerCase();
+      return name.includes(q) || name.includes(mapped);
+    });
+  }, [searchQuery]);
+
   return (
-    <div className="rounded-md border">
+    <div className="space-y-3">
+      <div className="relative">
+        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="단말기 검색 (아이폰, 갤럭시, 플립...)..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9 h-9"
+        />
+      </div>
+      <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
@@ -95,7 +126,7 @@ export function DeviceTable({ selectedDevice = [], onSelect }: DeviceTableProps)
           </TableRow>
         </TableHeader>
         <TableBody>
-          {DEVICES.map((device) => {
+          {filteredDevices.map((device) => {
             const isSelected = selected.has(device.id);
             return (
               <TableRow
@@ -122,6 +153,7 @@ export function DeviceTable({ selectedDevice = [], onSelect }: DeviceTableProps)
           })}
         </TableBody>
       </Table>
+      </div>
     </div>
   );
 }
