@@ -38,12 +38,11 @@ import {
 
 export default function AdvancedPage() {
   const [activeTab, setActiveTab] = useState('profile');
-  const [selectedScenarioId, setSelectedScenarioId] = useState<string | null>(null);
   const [analysisModalOpen, setAnalysisModalOpen] = useState(false);
   const [currentAnalysis, setCurrentAnalysis] = useState<CancellationAnalysis | null>(null);
 
   const { callStatus, startCall, endCall, holdCall, resumeCall, reset } = useCallStore();
-  const { openModal } = useUIStore();
+  const { openModal, selectedScenarioId, setSelectedScenarioId } = useUIStore();
   const { clearTranscripts } = useTranscriptStore();
   const { reset: resetAI } = useAIAnalysisStore();
 
@@ -105,11 +104,21 @@ export default function AdvancedPage() {
   const handleStartCall = () => {
     clearTranscripts();
     resetAI();
-    startCall('session-' + Date.now(), {
-      name: '김민수',
-      phone: '010-1234-5678',
-      customerId: 'SKT-001',
-    });
+
+    // 시나리오가 선택되어 있으면 해당 고객 정보 사용
+    if (selectedScenario) {
+      startCall('session-' + Date.now(), {
+        name: selectedScenario.customerInfo.name,
+        phone: selectedScenario.customerInfo.phone,
+        customerId: `SKT-${selectedScenario.id}`,
+      });
+    } else {
+      startCall('session-' + Date.now(), {
+        name: '김민수',
+        phone: '010-1234-5678',
+        customerId: 'SKT-001',
+      });
+    }
   };
 
   // 통화 종료

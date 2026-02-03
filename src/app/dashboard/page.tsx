@@ -24,13 +24,12 @@ type STTMode = 'mock' | 'real' | 'ai';
 
 export default function DashboardPage() {
   const [sttMode, setSTTMode] = useState<STTMode>('ai');
-  const [selectedScenarioId, setSelectedScenarioId] = useState('plan-change');
 
   const { callStatus, startCall, endCall, holdCall, resumeCall, reset } = useCallStore();
-  const { openModal } = useUIStore();
+  const { openModal, selectedScenarioId, setSelectedScenarioId } = useUIStore();
   const { clearTranscripts } = useTranscriptStore();
   const { reset: resetAI } = useAIAnalysisStore();
-  const { isPlaying, currentScenario, startConversation, stopConversation, resetConversation } = useMockSTT(selectedScenarioId);
+  const { isPlaying, currentScenario, startConversation, stopConversation, resetConversation } = useMockSTT(selectedScenarioId || 'plan-change');
 
   // 통화 시작
   const handleStartCall = () => {
@@ -132,8 +131,8 @@ export default function DashboardPage() {
                 {/* 데모 모드일 때 시나리오 선택 */}
                 {sttMode === 'mock' && (
                   <Select
-                    value={selectedScenarioId}
-                    onValueChange={setSelectedScenarioId}
+                    value={selectedScenarioId || 'plan-change'}
+                    onValueChange={(value) => setSelectedScenarioId(value)}
                   >
                     <SelectTrigger className="w-[180px] h-9">
                       <SelectValue placeholder="시나리오 선택" />

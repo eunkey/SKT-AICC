@@ -14,6 +14,7 @@ interface UIState {
   sidebarOpen: boolean;
   isJumpToLiveVisible: boolean;
   selectedDocument: SelectedDocument | null;
+  selectedScenarioId: string | null;
 
   // Actions
   toggleZoneB: () => void;
@@ -24,6 +25,7 @@ interface UIState {
   setSidebarOpen: (open: boolean) => void;
   setJumpToLiveVisible: (visible: boolean) => void;
   setSelectedDocument: (doc: SelectedDocument | null) => void;
+  setSelectedScenarioId: (id: string | null) => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
@@ -32,6 +34,7 @@ export const useUIStore = create<UIState>((set) => ({
   sidebarOpen: false,
   isJumpToLiveVisible: false,
   selectedDocument: null,
+  selectedScenarioId: null,
 
   toggleZoneB: () =>
     set((state) => ({ zoneBExpanded: !state.zoneBExpanded })),
@@ -50,4 +53,6 @@ export const useUIStore = create<UIState>((set) => ({
   setJumpToLiveVisible: (visible) => set({ isJumpToLiveVisible: visible }),
 
   setSelectedDocument: (doc) => set({ selectedDocument: doc }),
+
+  setSelectedScenarioId: (id) => set({ selectedScenarioId: id }),
 }));
