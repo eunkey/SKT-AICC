@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
@@ -11,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Calculator } from 'lucide-react';
+import { Calculator, Search } from 'lucide-react';
 import { ExtendedPlan } from '../types';
 
 interface Plan {
@@ -283,6 +284,7 @@ interface PlanTableProps {
 
 export function PlanTable({ currentPlanId, onSelect, extendedPlans, onAnalyze }: PlanTableProps) {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(currentPlanId || null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleSelect = (planId: string) => {
     if (selectedPlan === planId) {
@@ -295,7 +297,19 @@ export function PlanTable({ currentPlanId, onSelect, extendedPlans, onAnalyze }:
   };
 
   // 확장된 요금제 데이터가 있으면 사용, 없으면 기본 데이터 사용
-  const plansToShow = extendedPlans || PLANS;
+  const basePlans = extendedPlans || PLANS;
+  const plansToShow = useMemo(() => {
+    if (!searchQuery.trim()) return basePlans;
+    const q = searchQuery.toLowerCase();
+    return basePlans.filter(
+      (p) =>
+        p.name.toLowerCase().includes(q) ||
+        p.type.toLowerCase().includes(q) ||
+        p.price.includes(q) ||
+        p.data.toLowerCase().includes(q) ||
+        p.features.some((f) => f.toLowerCase().includes(q))
+    );
+  }, [basePlans, searchQuery]);
 
   const handleAnalyze = (planId: string) => {
     if (extendedPlans && onAnalyze) {
@@ -307,7 +321,17 @@ export function PlanTable({ currentPlanId, onSelect, extendedPlans, onAnalyze }:
   };
 
   return (
-    <div className="rounded-md border">
+    <div className="space-y-3">
+      <div className="relative">
+        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="요금제 검색 (이름, 유형, 가격, 데이터)..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9 h-9"
+        />
+      </div>
+      <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
@@ -372,6 +396,7 @@ export function PlanTable({ currentPlanId, onSelect, extendedPlans, onAnalyze }:
           })}
         </TableBody>
       </Table>
+      </div>
     </div>
   );
 }

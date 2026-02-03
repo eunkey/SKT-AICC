@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
@@ -11,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Calculator } from 'lucide-react';
+import { Calculator, Search } from 'lucide-react';
 import { ExtendedDiscount } from '../types';
 
 interface Discount {
@@ -181,6 +182,7 @@ export function DiscountTable({
   onAnalyze,
 }: DiscountTableProps) {
   const [selected, setSelected] = useState<Set<string>>(new Set(selectedDiscounts));
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleSelect = (discountId: string) => {
     const newSelected = new Set(selected);
@@ -194,7 +196,19 @@ export function DiscountTable({
   };
 
   // 확장된 할인 데이터가 있으면 사용
-  const discountsToShow = extendedDiscounts || DISCOUNTS;
+  const baseDiscounts = extendedDiscounts || DISCOUNTS;
+  const discountsToShow = useMemo(() => {
+    if (!searchQuery.trim()) return baseDiscounts;
+    const q = searchQuery.toLowerCase();
+    return baseDiscounts.filter(
+      (d) =>
+        d.name.toLowerCase().includes(q) ||
+        d.type.toLowerCase().includes(q) ||
+        d.condition.toLowerCase().includes(q) ||
+        d.benefit.toLowerCase().includes(q) ||
+        d.discountAmount.includes(q)
+    );
+  }, [baseDiscounts, searchQuery]);
 
   const handleAnalyze = (discountId: string) => {
     if (extendedDiscounts && onAnalyze) {
@@ -206,7 +220,17 @@ export function DiscountTable({
   };
 
   return (
-    <div className="rounded-md border">
+    <div className="space-y-3">
+      <div className="relative">
+        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="할인 검색 (이름, 유형, 조건)..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9 h-9"
+        />
+      </div>
+      <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
@@ -271,6 +295,7 @@ export function DiscountTable({
           })}
         </TableBody>
       </Table>
+      </div>
     </div>
   );
 }
