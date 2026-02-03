@@ -5,9 +5,19 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Search, Sparkles, TrendingDown, TrendingUp, Minus, BarChart3 } from 'lucide-react';
+import { Search, Sparkles, TrendingDown, TrendingUp, Minus, BarChart3, Smartphone, X } from 'lucide-react';
 import { useTranscriptStore } from '@/stores';
+import { DEVICES, type Device } from './DeviceTable';
 import { extractIntents, resolveAllProducts } from '@/lib/skt-dictionary';
+
+// 이름 기준 중복 제거 (같은 모델이 여러 카테고리에 있으므로)
+const UNIQUE_DEVICES: Device[] = Array.from(
+  DEVICES.reduce((map, d) => {
+    if (!map.has(d.name)) map.set(d.name, d);
+    return map;
+  }, new Map<string, Device>())
+    .values()
+);
 
 // ── 요금제 데이터 ──
 
@@ -434,6 +444,8 @@ function formatCurrency(amount: number): string {
 export function PlanCalculator() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
+  const [deviceSearch, setDeviceSearch] = useState('');
   const [selectedAddons, setSelectedAddons] = useState<Set<string>>(new Set());
   const [selectedDiscounts, setSelectedDiscounts] = useState<Set<string>>(new Set());
   const [aiResult, setAiResult] = useState<AIRecommendationResult | null>(null);
@@ -457,6 +469,25 @@ export function PlanCalculator() {
   const displayPlans = aiResult?.plans || filteredPlans;
 
   const selectedPlan = PLANS.find((p) => p.id === selectedPlanId);
+  const selectedDevice = UNIQUE_DEVICES.find((d) => d.id === selectedDeviceId);
+
+  const filteredDevices = useMemo(() => {
+    if (!deviceSearch.trim()) return UNIQUE_DEVICES;
+    const q = deviceSearch.toLowerCase();
+    const ALIASES: Record<string, string> = {
+      '아이폰': 'iphone', '갤럭시': 'galaxy', '폴드': 'fold',
+      '플립': 'flip', '퀀텀': 'quantum', '울트라': 'ultra',
+    };
+    // 한글 키워드를 영문으로 치환한 검색어도 함께 매칭
+    let mapped = q;
+    for (const [ko, en] of Object.entries(ALIASES)) {
+      mapped = mapped.replaceAll(ko, en);
+    }
+    return UNIQUE_DEVICES.filter((d) => {
+      const name = d.name.toLowerCase();
+      return name.includes(q) || name.includes(mapped);
+    });
+  }, [deviceSearch]);
 
   // AI 추천 실행
   const handleAIRecommend = () => {
@@ -510,6 +541,7 @@ export function PlanCalculator() {
 
   const calculation = useMemo(() => {
     const basePlanPrice = selectedPlan?.price ?? 0;
+    const deviceInstallment = selectedDevice?.monthlyInstallment ?? 0;
 
     const addonTotal = ADDON_SERVICES
       .filter((a) => selectedAddons.has(a.id))
@@ -526,19 +558,20 @@ export function PlanCalculator() {
       }
     });
 
-    const estimatedTotal = Math.max(0, basePlanPrice + addonTotal - discountTotal);
+    const estimatedTotal = Math.max(0, basePlanPrice + addonTotal + deviceInstallment - discountTotal);
     const currentTotal = CURRENT_PLAN.price;
     const difference = estimatedTotal - currentTotal;
 
     return {
       basePlanPrice,
+      deviceInstallment,
       addonTotal,
       discountTotal,
       estimatedTotal,
       currentTotal,
       difference,
     };
-  }, [selectedPlan, selectedAddons, selectedDiscounts]);
+  }, [selectedPlan, selectedDevice, selectedAddons, selectedDiscounts]);
 
   return (
     <div className="flex flex-col h-full">
@@ -647,7 +680,7 @@ export function PlanCalculator() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-48 overflow-auto">
           {displayPlans.map((plan) => {
             const isSelected = selectedPlanId === plan.id;
             const isCurrent = plan.id === CURRENT_PLAN_ID;
@@ -691,6 +724,75 @@ export function PlanCalculator() {
             검색 결과가 없습니다.
           </div>
         )}
+      </section>
+
+      {/* ①-2 단말기 선택 */}
+      <section>
+        <h3 className="text-sm font-semibold mb-3 flex items-center gap-1.5">
+          <Smartphone className="w-4 h-4" />
+          단말기 선택 (24개월 할부)
+        </h3>
+
+        {selectedDevice && (
+          <div className="mb-3 rounded-lg border border-primary/20 bg-primary/5 p-3 flex items-center justify-between">
+            <div>
+              <div className="text-sm font-semibold">{selectedDevice.name}</div>
+              <div className="text-xs text-muted-foreground mt-0.5">
+                공시가 {formatCurrency(selectedDevice.retailPrice)} · 지원금 {formatCurrency(selectedDevice.subsidy)} · 실구매가 {formatCurrency(selectedDevice.actualPrice)}
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <div className="text-xs text-muted-foreground">월 할부금</div>
+                <div className="text-sm font-bold text-primary">{formatCurrency(selectedDevice.monthlyInstallment)}</div>
+              </div>
+              <button
+                onClick={() => setSelectedDeviceId(null)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="relative mb-3">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="단말기 검색..."
+            value={deviceSearch}
+            onChange={(e) => setDeviceSearch(e.target.value)}
+            className="pl-9 h-9"
+          />
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 max-h-48 overflow-auto">
+          {filteredDevices.map((device) => {
+            const isSelected = selectedDeviceId === device.id;
+            return (
+              <button
+                key={device.id}
+                onClick={() => setSelectedDeviceId(isSelected ? null : device.id)}
+                className={`
+                  text-left rounded-lg border p-2.5 transition-all
+                  ${isSelected
+                    ? 'border-primary bg-primary/5 ring-1 ring-primary'
+                    : 'border-border hover:border-primary/50 hover:bg-muted/30'
+                  }
+                `}
+              >
+                <div className="text-xs font-semibold truncate">{device.name}</div>
+                <div className="text-sm font-bold text-primary mt-1">{formatCurrency(device.monthlyInstallment)}/월</div>
+                <div className="text-[10px] text-muted-foreground mt-0.5">실구매 {formatCurrency(device.actualPrice)}</div>
+              </button>
+            );
+          })}
+          {filteredDevices.length === 0 && (
+            <div className="col-span-full text-center py-4 text-sm text-muted-foreground">
+              검색 결과가 없습니다.
+            </div>
+          )}
+        </div>
       </section>
 
       {/* ② 부가서비스 & 할인 선택 */}
@@ -777,6 +879,13 @@ export function PlanCalculator() {
               <span>기본 요금 ({selectedPlan.name})</span>
               <span className="font-medium">{formatCurrency(calculation.basePlanPrice)}</span>
             </div>
+
+            {calculation.deviceInstallment > 0 && (
+              <div className="flex justify-between text-sm">
+                <span>단말기 할부 (24M)</span>
+                <span className="font-medium">+{formatCurrency(calculation.deviceInstallment)}</span>
+              </div>
+            )}
 
             {calculation.addonTotal > 0 && (
               <div className="flex justify-between text-sm">

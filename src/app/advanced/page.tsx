@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useCallStore, useUIStore, useTranscriptStore, useAIAnalysisStore } from '@/stores';
-import { Phone, PhoneOff, Pause, Play, CreditCard, Plane, Gift, Tag, User, FlaskConical, Calculator } from 'lucide-react';
+import { Phone, PhoneOff, Pause, Play, CreditCard, Plane, Gift, Tag, User, FlaskConical, Calculator, Smartphone } from 'lucide-react';
 import {
   CustomerProfile,
   PlanTable,
@@ -23,6 +23,7 @@ import {
   DiscountTable,
   CancellationAnalysisModal,
   PlanCalculator,
+  DeviceTable,
 } from '@/features/advanced/components';
 import { WrapUpModal } from '@/features/wrap-up/components';
 import { DEMO_SCENARIOS, getScenarioById } from '@/features/advanced/data/demo-scenarios';
@@ -253,6 +254,10 @@ export default function AdvancedPage() {
                           <Tag className="w-3.5 h-3.5" />
                           할인
                         </TabsTrigger>
+                        <TabsTrigger value="devices" className="text-xs gap-1.5">
+                          <Smartphone className="w-3.5 h-3.5" />
+                          단말기
+                        </TabsTrigger>
                         <TabsTrigger value="calculator" className="text-xs gap-1.5">
                           <Calculator className="w-3.5 h-3.5" />
                           요금 시뮬레이터
@@ -338,6 +343,12 @@ export default function AdvancedPage() {
                           extendedDiscounts={selectedScenario?.discounts}
                           onAnalyze={handleAnalyzeDiscount}
                         />
+                      </TabsContent>
+
+                      {/* 단말기 탭 */}
+                      <TabsContent value="devices" className="mt-0 p-4">
+                        <h3 className="text-sm font-semibold mb-3">단말기 정보</h3>
+                        <DeviceTable />
                       </TabsContent>
 
                       {/* 요금 시뮬레이터 탭 */}

@@ -6,3 +6,5 @@ export { DiscountTable } from './DiscountTable';
 export { CancellationAnalysisModal } from './CancellationAnalysisModal';
 export { ImpactChart, CumulativeChart, ComparisonChart } from './ImpactChart';
 export { PlanCalculator } from './PlanCalculator';
+export { DeviceTable, DEVICES } from './DeviceTable';
+export type { Device } from './DeviceTable';
