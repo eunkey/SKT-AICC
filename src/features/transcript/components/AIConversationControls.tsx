@@ -23,11 +23,17 @@ export function AIConversationControls({ isCallActive }: AIConversationControlsP
 
   // 상담 종료 시 음성 인식 자동 중지
   useEffect(() => {
-    if (!isCallActive && isRecording) {
+    if (!isCallActive) {
       console.log('[AI대화] 상담 종료로 인한 음성 인식 자동 중지');
       stopListening();
     }
-  }, [isCallActive, isRecording, stopListening]);
+
+    // 컴포넌트 언마운트 시에도 중지
+    return () => {
+      console.log('[AI대화] 컴포넌트 언마운트 - 음성 인식 중지');
+      stopListening();
+    };
+  }, [isCallActive, stopListening]);
 
   const handleToggle = () => {
     if (isRecording) {
@@ -37,6 +43,7 @@ export function AIConversationControls({ isCallActive }: AIConversationControlsP
     }
   };
 
+  // 상담 중이 아니면 UI 숨김 (컴포넌트는 마운트 유지)
   if (!isCallActive) return null;
 
   return (
