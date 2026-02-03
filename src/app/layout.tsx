@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'SK텔레콤 AI 상담 어시스턴트',
-  description: 'SK텔레콤 고객센터 상담사를 위한 실시간 AI 지원 시스템',
+  description: 'SK텔레콤 고객센터 상담사를 위한 실시간 지원 시스템',
 };
 
 export default function RootLayout({
