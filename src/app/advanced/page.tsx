@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useCallStore, useUIStore, useTranscriptStore, useAIAnalysisStore } from '@/stores';
-import { Phone, PhoneOff, Pause, Play, CreditCard, Plane, Gift, Tag, User, FlaskConical, Calculator, Smartphone } from 'lucide-react';
+import { Phone, PhoneOff, Pause, Play, CreditCard, Plane, Gift, Tag, User, FlaskConical, Calculator, Smartphone, AlertCircle } from 'lucide-react';
 import {
   CustomerProfile,
   PlanTable,
@@ -24,6 +24,7 @@ import {
   CancellationAnalysisModal,
   PlanCalculator,
   DeviceTable,
+  TroubleshootTable,
 } from '@/features/advanced/components';
 import { WrapUpModal } from '@/features/wrap-up/components';
 import { DEMO_SCENARIOS, getScenarioById } from '@/features/advanced/data/demo-scenarios';
@@ -258,6 +259,10 @@ export default function AdvancedPage() {
                           <Smartphone className="w-3.5 h-3.5" />
                           단말기
                         </TabsTrigger>
+                        <TabsTrigger value="troubleshoot" className="text-xs gap-1.5">
+                          <AlertCircle className="w-3.5 h-3.5" />
+                          장애/VoC
+                        </TabsTrigger>
                         <TabsTrigger value="calculator" className="text-xs gap-1.5">
                           <Calculator className="w-3.5 h-3.5" />
                           요금 시뮬레이터
@@ -349,6 +354,12 @@ export default function AdvancedPage() {
                       <TabsContent value="devices" className="mt-0 p-4">
                         <h3 className="text-sm font-semibold mb-3">단말기 정보</h3>
                         <DeviceTable />
+                      </TabsContent>
+
+                      {/* 장애/VoC 가이드 탭 */}
+                      <TabsContent value="troubleshoot" className="mt-0 p-4">
+                        <h3 className="text-sm font-semibold mb-3">장애대응 / VoC 가이드</h3>
+                        <TroubleshootTable />
                       </TabsContent>
 
                       {/* 요금 시뮬레이터 탭 */}
