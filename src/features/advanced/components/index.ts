@@ -8,3 +8,4 @@ export { ImpactChart, CumulativeChart, ComparisonChart } from './ImpactChart';
 export { PlanCalculator } from './PlanCalculator';
 export { DeviceTable, DEVICES } from './DeviceTable';
 export type { Device } from './DeviceTable';
+export { TroubleshootTable } from './TroubleshootTable';
