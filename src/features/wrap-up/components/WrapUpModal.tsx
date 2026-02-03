@@ -123,7 +123,7 @@ ${transcript}
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-lg">상담 마무리</DialogTitle>
@@ -131,29 +131,39 @@ ${transcript}
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-auto space-y-6 py-4">
+        <div className="flex-1 overflow-auto py-4">
           {isGenerating ? (
-            <div className="space-y-4">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-32 w-full" />
-              <Skeleton className="h-4 w-32" />
-              <Skeleton className="h-20 w-full" />
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-64 w-full" />
+              </div>
+              <div className="space-y-4">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-40 w-full" />
+              </div>
             </div>
           ) : (
-            <>
-              <CallSummarySection
-                summary={summary}
-                onSummaryChange={setSummary}
-              />
+            <div className="grid grid-cols-2 gap-6 h-full">
+              {/* 왼쪽: 상담 요약 */}
+              <div className="min-h-0">
+                <CallSummarySection
+                  summary={summary}
+                  onSummaryChange={setSummary}
+                />
+              </div>
 
-              <SMSSection
-                enabled={sendSMS}
-                onEnabledChange={setSendSMS}
-                content={smsContent}
-                onContentChange={setSmsContent}
-                recipient={customerInfo?.phone || ''}
-              />
-            </>
+              {/* 오른쪽: SMS 전송 */}
+              <div className="min-h-0">
+                <SMSSection
+                  enabled={sendSMS}
+                  onEnabledChange={setSendSMS}
+                  content={smsContent}
+                  onContentChange={setSmsContent}
+                  recipient={customerInfo?.phone || ''}
+                />
+              </div>
+            </div>
           )}
         </div>
 
