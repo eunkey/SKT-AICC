@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { getPromptDictionary } from '@/lib/skt-dictionary';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -27,7 +28,10 @@ const SYSTEM_PROMPT = `당신은 SK텔레콤 고객센터의 상담 내용을 �
 2. 대화에 없는 내용은 추측하지 마세요
 3. 고객의 실제 문의 유형을 정확히 파악하세요 (요금제, 로밍, 분실, 청구서 등)
 4. 간결하고 명확하게 작성하세요
-5. 민감한 개인정보(주민번호, 카드번호 등)는 마스킹 처리하세요`;
+5. 민감한 개인정보(주민번호, 카드번호 등)는 마스킹 처리하세요
+6. 고객이 줄임말/구어체를 사용한 경우 요약에는 정식 상품명을 사용하세요
+
+${getPromptDictionary()}`;
 
 export async function POST(request: NextRequest) {
   try {

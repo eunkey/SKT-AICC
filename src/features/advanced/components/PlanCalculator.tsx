@@ -8,6 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Search, Sparkles, TrendingDown, TrendingUp, Minus, BarChart3, Smartphone, X } from 'lucide-react';
 import { useTranscriptStore } from '@/stores';
 import { DEVICES, type Device } from './DeviceTable';
+import { extractIntents, resolveAllProducts } from '@/lib/skt-dictionary';
 
 // 이름 기준 중복 제거 (같은 모델이 여러 카테고리에 있으므로)
 const UNIQUE_DEVICES: Device[] = Array.from(
@@ -331,20 +332,32 @@ interface AIRecommendationResult {
 }
 
 function getAIRecommendations(transcript: string): AIRecommendationResult {
-  const text = transcript.toLowerCase();
   const { avgDataGB, maxDataGB, avgCallMinutes } = CUSTOMER_USAGE;
 
   // 실 사용량 기반 적정 데이터 산정 (최대 사용량 + 20% 여유)
   const recommendedDataGB = Math.ceil(maxDataGB * 1.2);
 
-  // 대화에서 키워드 감지
-  const needsMoreData = ['데이터 부족', '데이터가 부족', '데이터 많이', '데이터가 모자', '데이터 다 써', '데이터 더'].some((kw) => text.includes(kw));
-  const wantsCheaper = ['비싸', '저렴', '싸게', '할인', '절약', '요금이 높', '요금 낮', '부담'].some((kw) => text.includes(kw));
-  const wantsPremium = ['5g', '5지', '프리미엄', '플래티넘', '프라임', '속도 빠른', '속도가 빠', '빠른 속도', '무제한'].some((kw) => text.includes(kw));
-  const wantsYoung = ['청년', '젊', '0청년', '영', '2030'].some((kw) => text.includes(kw));
+  // 딕셔너리 기반 의도 추출
+  const intents = extractIntents(transcript);
+  const matchedProducts = resolveAllProducts(transcript);
+
+  // 특정 요금제가 언급된 경우 해당 요금제를 우선 표시
+  const mentionedPlanIds = matchedProducts
+    .filter(e => e.type === 'plan')
+    .map(e => e.id);
+  if (mentionedPlanIds.length > 0) {
+    const mentionedPlans = PLANS.filter(p => mentionedPlanIds.includes(p.id));
+    if (mentionedPlans.length > 0) {
+      const names = mentionedPlans.map(p => p.name).join(', ');
+      return {
+        plans: mentionedPlans.slice(0, 3),
+        reason: `고객이 언급한 요금제: ${names}`,
+      };
+    }
+  }
 
   // 1) 요금이 비싸다 → 사용량 기준으로 데이터 충분한 요금제 중 저렴한 것
-  if (wantsCheaper) {
+  if (intents.costSaving) {
     const suitable = PLANS
       .filter((p) => p.dataGB >= recommendedDataGB && p.price < CURRENT_PLAN.price)
       .sort((a, b) => a.price - b.price);
@@ -361,7 +374,7 @@ function getAIRecommendations(transcript: string): AIRecommendationResult {
   }
 
   // 2) 데이터 부족 → 현재보다 데이터 많은 요금제
-  if (needsMoreData) {
+  if (intents.dataMore) {
     const morePlans = PLANS
       .filter((p) => p.dataGB > (CURRENT_PLAN.dataGB === 999 ? avgDataGB : CURRENT_PLAN.dataGB))
       .sort((a, b) => a.dataGB - b.dataGB);
@@ -371,24 +384,37 @@ function getAIRecommendations(transcript: string): AIRecommendationResult {
     };
   }
 
-  // 3) 프리미엄/청년 선호
-  if (wantsPremium) {
+  // 3) 프리미엄/청년/시니어/청소년 선호
+  if (intents.premium) {
     const plans = PLANS.filter((p) => p.category === '5GX' && p.dataGB >= recommendedDataGB).slice(0, 3);
     return {
       plans: plans.length > 0 ? plans : PLANS.filter((p) => p.category === '5GX').slice(0, 3),
       reason: `5GX 프리미엄 요금제 중 월 사용량(${avgDataGB}GB) 커버 가능한 요금제`,
     };
   }
-  if (wantsYoung) {
+  if (intents.young) {
     const plans = PLANS.filter((p) => p.category === '0청년' && p.dataGB >= recommendedDataGB).slice(0, 3);
     return {
       plans: plans.length > 0 ? plans : PLANS.filter((p) => p.category === '0청년').slice(0, 3),
       reason: `0 청년 요금제 중 월 사용량(${avgDataGB}GB) 커버 가능한 요금제 (만 34세 이하)`,
     };
   }
+  if (intents.senior) {
+    const plans = PLANS.filter((p) => p.category === '시니어').slice(0, 3);
+    return {
+      plans: plans.length > 0 ? plans : PLANS.filter((p) => p.category === '시니어').slice(0, 3),
+      reason: `시니어 요금제 (65세 이상 전용)`,
+    };
+  }
+  if (intents.teen) {
+    const plans = PLANS.filter((p) => p.category === '청소년').slice(0, 3);
+    return {
+      plans: plans.length > 0 ? plans : PLANS.filter((p) => p.category === '청소년').slice(0, 3),
+      reason: `청소년 전용 요금제`,
+    };
+  }
 
   // 4) 키워드 없음 → 사용 패턴 기반 최적 요금제 추천
-  //    실 사용량 대비 과금 요금제인지 분석
   const optimal = PLANS
     .filter((p) => p.dataGB >= recommendedDataGB)
     .sort((a, b) => a.price - b.price)

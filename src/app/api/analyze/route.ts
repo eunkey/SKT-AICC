@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { getPromptDictionary } from '@/lib/skt-dictionary';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -23,6 +24,10 @@ SK텔레콤 주요 상담 분야:
 - T멤버십: 포인트, 등급 혜택, 제휴사 할인
 - 주소: 주소 변경, 이사, 청구지 주소, 인터넷/TV 이전 설치
 - 부가서비스: T전화, 콜러링, 스팸차단
+
+중요: 키워드 추출 시 고객이 줄임말/구어체를 사용하면 정식 상품명으로 정규화하여 keywords에 포함하세요.
+
+${getPromptDictionary()}
 
 응답은 반드시 아래 JSON 형식을 따라주세요:
 {

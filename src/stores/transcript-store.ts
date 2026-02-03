@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { correctTranscription } from '@/lib/skt-dictionary';
 
 export interface TranscriptEntry {
   id: string;
@@ -29,12 +30,20 @@ export const useTranscriptStore = create<TranscriptState>((set, get) => ({
 
   addTranscript: (entry) =>
     set((state) => ({
-      transcripts: [...state.transcripts, entry],
+      transcripts: [...state.transcripts, {
+        ...entry,
+        text: entry.speaker === 'customer' ? correctTranscription(entry.text) : entry.text,
+      }],
     })),
 
   updateInterim: (entry) =>
     set({
-      currentInterim: entry || null,
+      currentInterim: entry
+        ? {
+            ...entry,
+            text: entry.speaker === 'customer' ? correctTranscription(entry.text) : entry.text,
+          }
+        : null,
     }),
 
   finalizeInterim: () =>
