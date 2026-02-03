@@ -124,6 +124,24 @@ const addressVerificationConversation: MockConversationItem[] = [
   { speaker: 'counselor', text: '천만에요. 새 집에서 행복하세요! 추가 문의 있으시면 언제든 114로 연락 주세요. 좋은 하루 되세요!', delay: 84000 },
 ];
 
+// 시나리오 6: 복합 상담 (요금제 변경 + 로밍 + 부가서비스)
+const multiTopicConversation: MockConversationItem[] = [
+  { speaker: 'customer', text: '안녕하세요. 몇 가지 여쭤볼 게 있어요.', delay: 0 },
+  { speaker: 'counselor', text: '네, SK텔레콤 고객센터입니다. 정하늘 고객님, 무엇을 도와드릴까요?', delay: 3000 },
+  { speaker: 'customer', text: '첫째로 요금제를 좀 낮추고 싶은데 0 청년 요금제로 바꿀 수 있나요?', delay: 7000 },
+  { speaker: 'counselor', text: '네, 고객님 나이를 확인해보니 29세시네요. 0 청년 59 요금제 가입 가능하십니다. 현재 5G 프라임 89,000원에서 0 청년 59 59,000원으로 변경 시 월 3만원 절약됩니다.', delay: 11000 },
+  { speaker: 'customer', text: '좋아요. 그리고 다음 주에 일본 여행 가는데 로밍은 어떻게 해요?', delay: 17000 },
+  { speaker: 'counselor', text: '일본 여행 기간이 어떻게 되시나요?', delay: 21000 },
+  { speaker: 'customer', text: '일주일이요.', delay: 24000 },
+  { speaker: 'counselor', text: '7일 여행이시면 baro 로밍 6GB를 추천드립니다. 33,000원에 6GB 데이터와 긴급통화가 포함되어 있어요. T월드 앱에서 출발 전 신청하시면 현지 도착 시 자동 활성화됩니다.', delay: 27000 },
+  { speaker: 'customer', text: '아 그리고 컬러링도 해지해주세요. 안 쓰는데 계속 나가고 있더라고요.', delay: 34000 },
+  { speaker: 'counselor', text: '컬러링 해지 처리해 드렸습니다. 월 2,200원 절약되세요.', delay: 38000 },
+  { speaker: 'customer', text: '감사합니다!', delay: 42000 },
+  { speaker: 'counselor', text: '정하늘 고객님, 오늘 처리 내용 정리해 드릴게요. 요금제 변경으로 월 3만원, 컬러링 해지로 월 2,200원, 총 월 32,200원 절약되세요. 로밍은 T월드 앱에서 출발 전 신청해 주세요. 안내 문자 발송해 드릴까요?', delay: 45000 },
+  { speaker: 'customer', text: '네, 문자로 정리해서 보내주세요!', delay: 52000 },
+  { speaker: 'counselor', text: '네, 문자 발송해 드리겠습니다. 즐거운 일본 여행 되세요! 추가 문의 있으시면 114로 연락 주세요.', delay: 55000 },
+];
+
 // 전체 데모 시나리오 목록
 export const DEMO_SCENARIOS: DemoScenarioConfig[] = [
   {
@@ -195,6 +213,20 @@ export const DEMO_SCENARIOS: DemoScenarioConfig[] = [
       planPrice: '89,000원',
     },
     conversation: addressVerificationConversation,
+  },
+  {
+    id: 'multi-topic',
+    name: '복합 상담 (다중 토픽)',
+    description: '요금제 변경 + 일본 로밍 + 부가서비스 해지 (SMS 토픽 선택 테스트)',
+    customerInfo: {
+      name: '정하늘',
+      phone: '010-1234-5678',
+      customerId: 'SKT-006',
+      plan: '5G 프라임',
+      planPrice: '89,000원',
+      services: ['컬러링'],
+    },
+    conversation: multiTopicConversation,
   },
 ];
 

@@ -394,8 +394,8 @@ const scenario5Discounts: ExtendedDiscount[] = [
 // 전체 시나리오 목록
 export const DEMO_SCENARIOS: DemoScenario[] = [
   {
-    id: 'scenario-1',
-    name: '시나리오 1: 프리미엄 약정 해지',
+    id: 'premium-cancel',
+    name: '프리미엄 약정 해지',
     description: '5G 프리미엄 89,000원 + 24개월 약정 (14개월 남음) + 공시지원금 50만원',
     customerName: '김민수',
     customerInfo: {
@@ -413,8 +413,8 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
     selectedDiscountIds: ['discount-contract-24', 'discount-auto-pay'],
   },
   {
-    id: 'scenario-2',
-    name: '시나리오 2: OTT 부가서비스 정리',
+    id: 'ott-cancel',
+    name: 'OTT 부가서비스 정리',
     description: '넷플릭스 + 디즈니+ + 유튜브 = 월 26,850원 (무약정)',
     customerName: '이영희',
     customerInfo: {
@@ -432,8 +432,8 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
     selectedDiscountIds: ['discount-auto-pay', 'discount-paperless'],
   },
   {
-    id: 'scenario-3',
-    name: '시나리오 3: 가족 결합 해지',
+    id: 'family-cancel',
+    name: '가족 결합 해지',
     description: '4인 가족 결합 + 인터넷 + TV 트리플 (연쇄 효과 발생)',
     customerName: '박철수',
     customerInfo: {
@@ -451,8 +451,8 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
     selectedDiscountIds: ['discount-family-4', 'discount-triple', 'discount-internet', 'discount-tv', 'discount-contract-24'],
   },
   {
-    id: 'scenario-4',
-    name: '시나리오 4: 주소 검증 및 변경',
+    id: 'address-verification',
+    name: '주소 검증 및 변경',
     description: '이사 후 청구지 주소 변경 + 도로명주소 자동 검증 (서울시 강남구 테헤란로)',
     customerName: '박서준',
     customerInfo: {
@@ -470,8 +470,8 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
     selectedDiscountIds: ['discount-auto-pay'],
   },
   {
-    id: 'scenario-5',
-    name: '시나리오 5: 복합 상담 (다중 토픽)',
+    id: 'multi-topic',
+    name: '복합 상담 (다중 토픽)',
     description: '요금제 변경 + 일본 로밍 + 부가서비스 해지 (SMS 토픽 선택 테스트용)',
     customerName: '정하늘',
     customerInfo: {
