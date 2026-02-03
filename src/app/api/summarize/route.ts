@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { getPromptDictionary } from '@/lib/skt-dictionary';
+import { ExtractedTopic, TopicType } from '@/types/sms';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -33,6 +34,61 @@ const SYSTEM_PROMPT = `당신은 SK텔레콤 고객센터의 상담 내용을 �
 
 ${getPromptDictionary()}`;
 
+const TOPIC_EXTRACTION_PROMPT = `당신은 SK텔레콤 고객센터 상담 내용에서 토픽을 추출하는 AI입니다.
+대화 내용을 분석하여 상담된 각 주제(토픽)별로 정보를 추출하세요.
+
+토픽 타입:
+- plan_change: 요금제 변경 (변경 전/후 요금제, 적용일, 요금 변화)
+- plan_inquiry: 요금제 문의/추천 (추천 요금제, 요금, 혜택)
+- roaming: 로밍 안내 (여행 국가, 추천 상품, 요금, 기간)
+- addon_service: 부가서비스 (가입/해지 서비스, 월 요금)
+- billing: 청구/요금 (청구 내역, 요금 문의, 납부)
+- membership: 멤버십/혜택 (T멤버십, 혜택 안내)
+- device: 단말기 (단말기 정보, 할부, 보험)
+- general: 일반 안내 (기타 문의)
+
+반드시 아래 JSON 형식으로만 응답하세요:
+{
+  "topics": [
+    {
+      "id": "topic_1",
+      "type": "plan_change",
+      "title": "요금제 변경 안내",
+      "summary": "5G 프라임에서 0 청년 59로 변경, 3/1 적용",
+      "keyInfo": {
+        "현재요금제": "5G 프라임",
+        "변경요금제": "0 청년 59",
+        "현재금액": "89,000원",
+        "변경금액": "59,000원",
+        "적용일": "3월 1일",
+        "월절감": "약 30,000원"
+      },
+      "smsContent": "[SK텔레콤] 요금제 변경 안내\\n\\n{고객명}님, 요금제 변경이 접수되었습니다.\\n\\n▶ 변경 내용\\n• 현재: 5G 프라임 (89,000원)\\n• 변경: 0 청년 59 (59,000원)\\n• 적용일: 3월 1일\\n• 월 절감: 약 30,000원\\n\\n※ T월드 앱에서 확인 가능\\n문의: 114"
+    }
+  ]
+}
+
+지침:
+1. 대화에서 실제로 다뤄진 주제만 추출하세요
+2. 각 토픽의 keyInfo는 해당 토픽에 필요한 핵심 정보만 포함하세요
+3. smsContent는 고객에게 실용적인 정보를 제공하는 형식으로 작성하세요
+4. {고객명}은 그대로 유지하세요 (나중에 치환됩니다)
+5. 금액은 "원" 단위로, 날짜는 이해하기 쉽게 표기하세요
+6. SMS는 간결하면서도 필요한 정보가 모두 포함되도록 작성하세요
+
+${getPromptDictionary()}`;
+
+interface TopicExtractionResponse {
+  topics: Array<{
+    id: string;
+    type: TopicType;
+    title: string;
+    summary: string;
+    keyInfo: Record<string, string>;
+    smsContent: string;
+  }>;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { transcript, customerName, callDuration } = await request.json();
@@ -59,72 +115,83 @@ ${transcript}
 
 위 대화 내용을 기반으로 상담 요약을 작성해주세요.`;
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
-        { role: 'user', content: userPrompt },
-      ],
-      max_tokens: 500,
-      temperature: 0.3,
-    });
+    // 요약 생성과 토픽 추출을 병렬로 실행
+    const [summaryCompletion, topicCompletion] = await Promise.all([
+      openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: userPrompt },
+        ],
+        max_tokens: 500,
+        temperature: 0.3,
+      }),
+      openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: TOPIC_EXTRACTION_PROMPT },
+          {
+            role: 'user',
+            content: `다음 상담 대화에서 토픽을 추출해주세요.
 
-    const summary = completion.choices[0]?.message?.content || '요약을 생성할 수 없습니다.';
+고객명: ${customerName || '고객'}
 
-    // SMS 내용도 생성 (LMS 형식으로 상세하게)
-    const smsCompletion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
+=== 대화 내용 ===
+${transcript}
+=== 대화 끝 ===`,
+          },
+        ],
+        max_tokens: 1500,
+        temperature: 0.3,
+        response_format: { type: 'json_object' },
+      }),
+    ]);
+
+    const summary = summaryCompletion.choices[0]?.message?.content || '요약을 생성할 수 없습니다.';
+
+    // 토픽 파싱
+    let topics: ExtractedTopic[] = [];
+    try {
+      const topicContent = topicCompletion.choices[0]?.message?.content;
+      if (topicContent) {
+        const parsed = JSON.parse(topicContent) as TopicExtractionResponse;
+        topics = (parsed.topics || []).map((topic) => ({
+          ...topic,
+          smsContent: topic.smsContent.replace(/{고객명}/g, customerName || '고객'),
+        }));
+      }
+    } catch (parseError) {
+      console.error('Topic parsing error:', parseError);
+      // 토픽 파싱 실패 시 기본 토픽 생성
+      topics = [
         {
-          role: 'system',
-          content: `당신은 SK텔레콤 고객센터의 안내 SMS(LMS) 메시지를 작성하는 AI입니다.
-상담 내용을 바탕으로 고객에게 발송할 상세한 안내 메시지를 작성하세요.
-
-작성 지침:
-- [SK텔레콤] 고객센터입니다. 로 시작
-- 300~500자 내외로 상세하게 작성
-- 고객님 호칭 사용
-- 상담 내용 요약 포함
-- 처리 결과를 step-by-step으로 안내 (1. 2. 3. 형식)
-- 추가로 필요한 조치가 있으면 안내
-- 관련 앱/웹사이트 안내 (T월드 앱, www.tworld.co.kr 등)
-- 문의 연락처(고객센터 114, 해외 +82-2-6343-9000) 포함
-- 마지막에 감사 인사
-
-예시:
-[SK텔레콤] 고객센터입니다.
-
-${customerName || '고객'}님, 금일 상담해 주셔서 감사합니다.
-
-■ 상담 내용
-- 요금제 변경 문의
-
-■ 처리 결과
-1. 5G 프라임 → 5G 슬림 요금제 변경 접수 완료
-2. 변경 적용일: 다음 달 1일부터
-3. 변경 후 요금: 월 59,000원
-
-■ 참고 사항
-- T월드 앱에서 요금제 변경 내역 확인 가능
-- 변경 취소는 적용일 전까지 가능
-
-추가 문의: 114 (무료) / 해외 +82-2-6343-9000
-감사합니다.`
+          id: 'topic_default',
+          type: 'general',
+          title: '상담 안내',
+          summary: '상담 내용을 확인해주세요',
+          keyInfo: {},
+          smsContent: `[SK텔레콤] 고객센터입니다.\n\n${customerName || '고객'}님, 상담이 완료되었습니다.\n\n※ T월드 앱에서 상세 내용 확인 가능\n문의: 114`,
         },
+      ];
+    }
+
+    // 토픽이 없는 경우 기본 토픽 추가
+    if (topics.length === 0) {
+      topics = [
         {
-          role: 'user',
-          content: `다음 상담 요약을 바탕으로 고객에게 발송할 상세한 안내 SMS를 작성해주세요:\n\n${summary}`
+          id: 'topic_default',
+          type: 'general',
+          title: '상담 안내',
+          summary: '상담 내용을 확인해주세요',
+          keyInfo: {},
+          smsContent: `[SK텔레콤] 고객센터입니다.\n\n${customerName || '고객'}님, 상담이 완료되었습니다.\n\n※ T월드 앱에서 상세 내용 확인 가능\n문의: 114`,
         },
-      ],
-      max_tokens: 400,
-      temperature: 0.3,
-    });
-
-    const smsContent = smsCompletion.choices[0]?.message?.content || '';
+      ];
+    }
 
     return NextResponse.json({
       summary,
-      smsContent,
+      topics,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

@@ -15,6 +15,7 @@ import { SMSSection } from './SMSSection';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CheckCircle2, X } from 'lucide-react';
 import { maskPII } from '@/lib/pii-masking';
+import { ExtractedTopic } from '@/types/sms';
 
 export function WrapUpModal() {
   const { activeModal, closeModal } = useUIStore();
@@ -27,6 +28,10 @@ export function WrapUpModal() {
   const [sendSMS, setSendSMS] = useState(true);
   const [smsContent, setSmsContent] = useState('');
 
+  // 토픽 관련 상태
+  const [topics, setTopics] = useState<ExtractedTopic[]>([]);
+  const [selectedTopicIds, setSelectedTopicIds] = useState<string[]>([]);
+
   const isOpen = activeModal === 'wrap-up';
 
   // 실제 대화 내용 기반 AI 요약 생성
@@ -34,6 +39,9 @@ export function WrapUpModal() {
     if (isOpen) {
       setIsGenerating(true);
       setPiiStatus('processing');
+      setTopics([]);
+      setSelectedTopicIds([]);
+      setSmsContent('');
 
       const generateSummary = async () => {
         const transcript = getFullText();
@@ -50,7 +58,17 @@ export function WrapUpModal() {
 
 ### 처리 내용
 - 상담 내용을 확인할 수 없습니다.`);
-          setSmsContent(`[SK텔레콤] ${customerInfo?.name || '고객'}님, 상담이 완료되었습니다. 문의: 114`);
+
+          const defaultTopic: ExtractedTopic = {
+            id: 'topic_default',
+            type: 'general',
+            title: '상담 안내',
+            summary: '상담이 완료되었습니다',
+            keyInfo: {},
+            smsContent: `[SK텔레콤] ${customerInfo?.name || '고객'}님, 상담이 완료되었습니다.\n\n문의: 114`,
+          };
+          setTopics([defaultTopic]);
+          setSelectedTopicIds([defaultTopic.id]);
           setPiiStatus('complete');
           setIsGenerating(false);
           return;
@@ -79,11 +97,23 @@ export function WrapUpModal() {
           const masked = maskPII(data.summary);
           setSummary(masked.masked);
 
-          // SMS 내용 설정
-          if (data.smsContent) {
-            setSmsContent(data.smsContent);
+          // 토픽 설정
+          if (data.topics && data.topics.length > 0) {
+            setTopics(data.topics);
+            // 기본적으로 모든 토픽 선택
+            setSelectedTopicIds(data.topics.map((t: ExtractedTopic) => t.id));
           } else {
-            setSmsContent(`[SK텔레콤] ${customerInfo?.name || '고객'}님, 상담이 완료되었습니다. 문의: 114`);
+            // 토픽이 없는 경우 기본 토픽
+            const defaultTopic: ExtractedTopic = {
+              id: 'topic_default',
+              type: 'general',
+              title: '상담 안내',
+              summary: '상담이 완료되었습니다',
+              keyInfo: {},
+              smsContent: `[SK텔레콤] ${customerInfo?.name || '고객'}님, 상담이 완료되었습니다.\n\n문의: 114`,
+            };
+            setTopics([defaultTopic]);
+            setSelectedTopicIds([defaultTopic.id]);
           }
 
           setPiiStatus('complete');
@@ -99,7 +129,17 @@ export function WrapUpModal() {
 ${transcript}
 
 (AI 요약 생성에 실패했습니다. 위 대화 기록을 참고해주세요.)`);
-          setSmsContent(`[SK텔레콤] ${customerInfo?.name || '고객'}님, 상담이 완료되었습니다. 문의: 114`);
+
+          const defaultTopic: ExtractedTopic = {
+            id: 'topic_default',
+            type: 'general',
+            title: '상담 안내',
+            summary: '상담이 완료되었습니다',
+            keyInfo: {},
+            smsContent: `[SK텔레콤] ${customerInfo?.name || '고객'}님, 상담이 완료되었습니다.\n\n문의: 114`,
+          };
+          setTopics([defaultTopic]);
+          setSelectedTopicIds([defaultTopic.id]);
           setPiiStatus('error');
         } finally {
           setIsGenerating(false);
@@ -140,6 +180,7 @@ ${transcript}
               </div>
               <div className="space-y-4">
                 <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-24 w-full" />
                 <Skeleton className="h-40 w-full" />
               </div>
             </div>
@@ -154,13 +195,17 @@ ${transcript}
               </div>
 
               {/* 오른쪽: SMS 전송 */}
-              <div className="min-h-0">
+              <div className="min-h-0 overflow-y-auto">
                 <SMSSection
                   enabled={sendSMS}
                   onEnabledChange={setSendSMS}
-                  content={smsContent}
-                  onContentChange={setSmsContent}
+                  topics={topics}
+                  selectedTopicIds={selectedTopicIds}
+                  onSelectedTopicIdsChange={setSelectedTopicIds}
+                  smsContent={smsContent}
+                  onSmsContentChange={setSmsContent}
                   recipient={customerInfo?.phone || ''}
+                  customerName={customerInfo?.name || '고객'}
                 />
               </div>
             </div>
