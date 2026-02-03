@@ -541,7 +541,8 @@ export function PlanCalculator() {
   }, [selectedPlan, selectedAddons, selectedDiscounts]);
 
   return (
-    <div className="space-y-5">
+    <div className="flex flex-col h-full">
+      <div className="flex-1 overflow-auto space-y-5 p-1">
       {/* ⓪ 고객 사용 이력 요약 */}
       <section className="rounded-lg border bg-muted/10 p-4">
         <h3 className="text-sm font-semibold mb-3 flex items-center gap-1.5">
@@ -760,9 +761,10 @@ export function PlanCalculator() {
           </div>
         </div>
       </section>
+      </div>
 
-      {/* ③ 계산 결과 패널 */}
-      <section className="rounded-lg border bg-muted/20 p-4">
+      {/* ③ 계산 결과 패널 — 하단 고정 */}
+      <div className="sticky bottom-0 border-t bg-background shadow-[0_-2px_8px_rgba(0,0,0,0.08)] p-4">
         <h3 className="text-sm font-semibold mb-3">예상 요금 계산</h3>
 
         {!selectedPlan ? (
@@ -832,7 +834,7 @@ export function PlanCalculator() {
             </div>
           </div>
         )}
-      </section>
+      </div>
     </div>
   );
 }
