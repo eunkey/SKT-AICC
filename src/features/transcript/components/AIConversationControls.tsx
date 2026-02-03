@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Mic, MicOff, Loader2, Volume2 } from 'lucide-react';
@@ -19,6 +20,14 @@ export function AIConversationControls({ isCallActive }: AIConversationControlsP
     startListening,
     stopListening,
   } = useAIConversation();
+
+  // 상담 종료 시 음성 인식 자동 중지
+  useEffect(() => {
+    if (!isCallActive && isRecording) {
+      console.log('[AI대화] 상담 종료로 인한 음성 인식 자동 중지');
+      stopListening();
+    }
+  }, [isCallActive, isRecording, stopListening]);
 
   const handleToggle = () => {
     if (isRecording) {
