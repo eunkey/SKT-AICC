@@ -307,6 +307,90 @@ const scenario4Discounts: ExtendedDiscount[] = [
   },
 ];
 
+// 시나리오 5: 복합 상담 (요금제 변경 + 로밍 + 부가서비스)
+const scenario5Plans: ExtendedPlan[] = [
+  {
+    id: '0-youth-59',
+    name: '0 청년 59',
+    type: '5G',
+    data: '무제한 (일 2GB 후 3Mbps)',
+    voice: '무제한',
+    message: '무제한',
+    price: '59,000원',
+    monthlyPrice: 59000,
+    features: ['5G 기본', '데이터 무제한', '만 34세 이하 전용'],
+    contract: null,
+    penalty: null,
+  },
+  {
+    id: '5g-premium-current',
+    name: '5G 프라임',
+    type: '5G',
+    data: '무제한',
+    voice: '무제한',
+    message: '무제한',
+    price: '89,000원',
+    monthlyPrice: 89000,
+    features: ['5G 최고 속도', '데이터 완전 무제한', 'FLO/wavve 무료'],
+    contract: null,
+    penalty: null,
+  },
+];
+
+const scenario5Addons: ExtendedAddonService[] = [
+  {
+    id: 'addon-baro-roaming',
+    name: 'baro 로밍 6GB',
+    category: '로밍',
+    description: '일본 7일 로밍 데이터',
+    benefit: '6GB 데이터 + 긴급통화',
+    price: '33,000원',
+    monthlyPrice: 0,
+    isFree: false,
+  },
+  {
+    id: 'addon-colorring',
+    name: '컬러링',
+    category: '엔터테인먼트',
+    description: '통화 연결음 설정',
+    benefit: '내가 선택한 음악으로 연결음',
+    price: '2,200원/월',
+    monthlyPrice: 2200,
+    isFree: false,
+  },
+  {
+    id: 'addon-data-coupon',
+    name: '데이터 쿠폰 1GB',
+    category: '데이터',
+    description: '추가 데이터 쿠폰',
+    benefit: '1GB 추가 데이터',
+    price: '1,100원',
+    monthlyPrice: 0,
+    isFree: false,
+  },
+];
+
+const scenario5Discounts: ExtendedDiscount[] = [
+  {
+    id: 'discount-auto-pay',
+    name: '자동이체 할인',
+    type: '납부 할인',
+    condition: '자동이체 등록',
+    benefit: '월 1,100원 할인',
+    discountAmount: '1,100원/월',
+    monthlyDiscount: 1100,
+  },
+  {
+    id: 'discount-paperless',
+    name: '전자 청구서',
+    type: '납부 할인',
+    condition: '전자 청구서 신청',
+    benefit: '월 550원 할인',
+    discountAmount: '550원/월',
+    monthlyDiscount: 550,
+  },
+];
+
 // 전체 시나리오 목록
 export const DEMO_SCENARIOS: DemoScenario[] = [
   {
@@ -384,6 +468,25 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
     selectedPlanId: '5gx-standard',
     selectedAddonIds: ['addon-auto-pay'],
     selectedDiscountIds: ['discount-auto-pay'],
+  },
+  {
+    id: 'scenario-5',
+    name: '시나리오 5: 복합 상담 (다중 토픽)',
+    description: '요금제 변경 + 일본 로밍 + 부가서비스 해지 (SMS 토픽 선택 테스트용)',
+    customerName: '정하늘',
+    customerInfo: {
+      name: '정하늘',
+      phone: '010-1234-5678',
+      gender: '여',
+      age: 29,
+      location: '서울특별시 송파구',
+    },
+    plans: scenario5Plans,
+    addons: scenario5Addons,
+    discounts: scenario5Discounts,
+    selectedPlanId: '5g-premium-current',
+    selectedAddonIds: ['addon-colorring'],
+    selectedDiscountIds: ['discount-auto-pay', 'discount-paperless'],
   },
 ];
 
