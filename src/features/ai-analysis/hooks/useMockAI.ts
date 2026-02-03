@@ -64,7 +64,7 @@ export function useMockAI() {
 
       if (!analyzeResponse.ok) {
         const errorData = await analyzeResponse.json();
-        throw new Error(errorData.error || 'AI 분석 API 오류');
+        throw new Error(errorData.error || '분석 서비스 오류');
       }
 
       const analyzeData: AnalyzeAPIResponse = await analyzeResponse.json();
@@ -112,7 +112,7 @@ export function useMockAI() {
       return result;
     } catch (error) {
       console.error('[AI분석] 오류 발생:', error);
-      setError(error instanceof Error ? error.message : 'AI 분석 중 오류가 발생했습니다.');
+      setError(error instanceof Error ? error.message : '분석 중 오류가 발생했습니다.');
       return null;
     }
   }, [setLoading, setCurrentResult, setError, getFullText]);
