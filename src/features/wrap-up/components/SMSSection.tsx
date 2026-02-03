@@ -53,7 +53,7 @@ export function SMSSection({
             <Textarea
               value={content}
               onChange={(e) => onContentChange(e.target.value)}
-              rows={10}
+              rows={15}
               className="pr-16 text-sm"
               placeholder="SMS 내용을 입력하세요"
             />

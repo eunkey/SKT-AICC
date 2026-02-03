@@ -138,7 +138,7 @@ export function CallSummarySection({
           <Textarea
             value={editedSummary}
             onChange={(e) => setEditedSummary(e.target.value)}
-            rows={10}
+            rows={15}
             className="font-mono text-sm"
           />
           <div className="flex justify-end gap-2">
